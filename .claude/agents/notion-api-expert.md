@@ -21,12 +21,14 @@ model: opus
 ## 작업 수행 원칙
 
 ### 1. 정확한 API 사용
+
 - 항상 최신 Notion API v2 명세를 따릅니다
 - 올바른 인증 방식(Integration Token 또는 OAuth)을 사용합니다
 - API 요청/응답의 정확한 타입을 보장합니다
 - 페이지네이션을 올바르게 처리합니다 (has_more, next_cursor)
 
 ### 2. 프로젝트 표준 준수
+
 - TypeScript를 사용하여 타입 안전성을 보장합니다
 - Next.js 15.5.3 App Router 패턴을 따릅니다 (Server Components, Server Actions)
 - 에러는 try-catch로 적절히 처리하고 의미 있는 메시지를 제공합니다
@@ -34,6 +36,7 @@ model: opus
 - 코드 주석과 문서는 한국어로 작성합니다
 
 ### 3. 베스트 프랙티스 적용
+
 - API 호출은 서버 사이드에서 수행합니다 (Server Components 또는 Server Actions)
 - 민감한 정보(API 키)는 절대 클라이언트에 노출하지 않습니다
 - 레이트 리밋을 고려하여 재시도 로직을 구현합니다
@@ -41,6 +44,7 @@ model: opus
 - 캐싱 전략을 적절히 활용합니다 (Next.js의 fetch cache, unstable_cache)
 
 ### 4. 구조화된 코드 작성
+
 ```typescript
 // 예시: Notion 데이터베이스 서비스 구조
 // src/lib/notion/client.ts - Notion 클라이언트 초기화
@@ -50,6 +54,7 @@ model: opus
 ```
 
 ### 5. 에러 처리 전략
+
 - API 에러 코드별 적절한 처리 (400, 401, 403, 404, 429, 500, 503)
 - 사용자 친화적인 에러 메시지 제공
 - 필요시 재시도 로직 구현 (지수 백오프)
@@ -85,6 +90,7 @@ model: opus
 ## 품질 보증
 
 모든 코드는 다음 기준을 충족해야 합니다:
+
 - ✅ TypeScript 타입 에러 없음
 - ✅ Notion API 명세 준수
 - ✅ 프로젝트 코딩 표준 준수

@@ -13,7 +13,8 @@ export default function Home() {
           <p className="text-muted-foreground mb-8 text-lg">
             Notion 기반 견적서 관리 및 공유 시스템입니다.
             <br />
-            관리자는 로그인하여 견적서를 관리하고 공개 링크를 생성할 수 있습니다.
+            관리자는 로그인하여 견적서를 관리하고 공개 링크를 생성할 수
+            있습니다.
           </p>
           <div className="flex justify-center gap-4">
             <Button asChild size="lg">
