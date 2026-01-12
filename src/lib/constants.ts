@@ -1,0 +1,65 @@
+/**
+ * 애플리케이션 전역 상수 정의
+ */
+
+/**
+ * 견적서 상태 상수
+ * Notion 데이터베이스의 Status Select 필드 값과 일치
+ */
+export const QUOTE_STATUS = {
+  DRAFT: '작성중',
+  SENT: '발송됨',
+  CONFIRMED: '확인됨',
+  APPROVED: '승인됨',
+  REJECTED: '거부됨',
+} as const
+
+/**
+ * 견적서 상태 타입
+ * "작성중" | "발송됨" | "확인됨" | "승인됨" | "거부됨"
+ */
+export type QuoteStatus = (typeof QUOTE_STATUS)[keyof typeof QUOTE_STATUS]
+
+/**
+ * 견적서 상태별 화면 표시용 라벨
+ */
+export const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {
+  [QUOTE_STATUS.DRAFT]: '작성중',
+  [QUOTE_STATUS.SENT]: '발송됨',
+  [QUOTE_STATUS.CONFIRMED]: '확인됨',
+  [QUOTE_STATUS.APPROVED]: '승인됨',
+  [QUOTE_STATUS.REJECTED]: '거부됨',
+}
+
+/**
+ * 견적서 상태별 UI 색상 (Tailwind CSS classes)
+ */
+export const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
+  [QUOTE_STATUS.DRAFT]: 'gray',
+  [QUOTE_STATUS.SENT]: 'blue',
+  [QUOTE_STATUS.CONFIRMED]: 'yellow',
+  [QUOTE_STATUS.APPROVED]: 'green',
+  [QUOTE_STATUS.REJECTED]: 'red',
+}
+
+/**
+ * 날짜 포맷 상수
+ */
+export const DATE_FORMAT = {
+  /** ISO 8601 형식: YYYY-MM-DD */
+  ISO: 'YYYY-MM-DD',
+  /** 한국어 형식: YYYY년 M월 D일 */
+  KOREAN: 'YYYY년 M월 D일',
+  /** 화면 표시용: YYYY.MM.DD */
+  DISPLAY: 'YYYY.MM.DD',
+} as const
+
+/**
+ * 통화 관련 상수
+ */
+export const CURRENCY = {
+  /** 한국 원화 기호 */
+  SYMBOL: '₩',
+  /** 통화 코드 */
+  CODE: 'KRW',
+} as const
