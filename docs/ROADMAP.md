@@ -154,117 +154,117 @@ Notion 데이터베이스 기반으로 견적서를 관리하고, 클라이언�
   - ✅ 관리자 레이아웃 미들웨어 (더미 인증 체크)
   - ✅ 페이지 전환 애니메이션 (선택사항)
 
-### Phase 3: 핵심 기능 구현
+### Phase 3: 핵심 기능 구현 ✅
 
-- **Task 011: Notion API 연동 설정**
-  - Notion API 클라이언트 설정
+- ✅ **Task 011: Notion API 연동 설정**
+  - ✅ Notion API 클라이언트 설정
     - `/lib/notion/client.ts` (@notionhq/client 초기화)
     - 환경 변수에서 Notion Integration Token 로드
-  - Notion 데이터베이스 연결 함수 구현
+  - ✅ Notion 데이터베이스 연결 함수 구현
     - `getDatabase(databaseId: string)`
     - 연결 상태 확인 및 에러 핸들링
-  - Playwright MCP를 활용한 Notion API 연결 테스트
+  - ✅ Playwright MCP를 활용한 Notion API 연결 테스트
     - Notion 데이터베이스 조회 성공 여부 확인
     - 에러 시나리오 테스트 (잘못된 토큰, 존재하지 않는 DB 등)
 
-- **Task 012: 견적서 조회 API 구현 (F001)**
-  - Notion API로 Quotes 데이터베이스 조회 함수 구현
+- ✅ **Task 012: 견적서 조회 API 구현 (F001)**
+  - ✅ Notion API로 Quotes 데이터베이스 조회 함수 구현
     - `/lib/notion/quotes.ts` (`getQuotes()`, `getQuoteById()`)
     - Relation 필드를 통한 Customer 및 QuoteItems 조인 조회
-  - Notion 응답 데이터를 TypeScript 타입으로 변환
+  - ✅ Notion 응답 데이터를 TypeScript 타입으로 변환
     - Notion 속성 → Quote 타입 매핑 함수
-  - 페이지네이션 및 필터링 로직 구현
-  - Server Component에서 Notion 데이터 조회
+  - ✅ 페이지네이션 및 필터링 로직 구현
+  - ✅ Server Component에서 Notion 데이터 조회
     - 관리자 대시보드 페이지에서 실제 Notion 데이터 표시
     - 견적서 상세 페이지(관리자용)에서 실제 Notion 데이터 표시
-  - Playwright MCP로 견적서 조회 E2E 테스트
+  - ✅ Playwright MCP로 견적서 조회 E2E 테스트
     - 대시보드에서 견적서 목록 렌더링 확인
     - 견적서 상세 페이지 데이터 표시 확인
     - 빈 상태 및 에러 상태 테스트
 
-- **Task 013: NextAuth.js v5 인증 시스템 구현 (F010)**
-  - NextAuth.js v5 설정
+- ✅ **Task 013: NextAuth.js v5 인증 시스템 구현 (F010)**
+  - ✅ NextAuth.js v5 설정
     - `/app/api/auth/[...nextauth]/route.ts` 설정
     - Credentials Provider 구성
-  - 로그인 Server Action 구현
+  - ✅ 로그인 Server Action 구현
     - `/app/actions/auth.ts` (`signIn()`, `signOut()`)
     - 이메일/비밀번호 검증 로직
     - 세션 생성 및 쿠키 설정
-  - 관리자 계정 관리 (초기 계정 생성)
+  - ✅ 관리자 계정 관리 (초기 계정 생성)
     - 환경 변수 또는 Supabase로 관리자 계정 저장
-  - 인증 미들웨어 구현
+  - ✅ 인증 미들웨어 구현
     - `/middleware.ts` (관리자 페이지 접근 제어)
-  - 로그인 페이지 실제 인증 연동
+  - ✅ 로그인 페이지 실제 인증 연동
     - 더미 함수 → 실제 Server Action 교체
-  - Playwright MCP로 인증 플로우 E2E 테스트
+  - ✅ Playwright MCP로 인증 플로우 E2E 테스트
     - 로그인 성공 시나리오
     - 로그인 실패 시나리오 (잘못된 비밀번호, 존재하지 않는 계정)
     - 로그아웃 시나리오
     - 인증되지 않은 사용자의 관리자 페이지 접근 차단 확인
 
-- **Task 014: 공개 링크 생성 기능 구현 (F002)**
-  - 공개 링크 ID 생성 로직
+- ✅ **Task 014: 공개 링크 생성 기능 구현 (F002)**
+  - ✅ 공개 링크 ID 생성 로직
     - `/lib/utils/link.ts` (`generatePublicLinkId()`)
     - nanoid 또는 UUID 사용
-  - Notion API로 Quotes 데이터베이스 업데이트 함수
+  - ✅ Notion API로 Quotes 데이터베이스 업데이트 함수
     - `/lib/notion/quotes.ts` (`updateQuotePublicLink()`)
     - `public_link_id` 필드 업데이트
-  - 공개 링크 생성 Server Action 구현
+  - ✅ 공개 링크 생성 Server Action 구현
     - `/app/actions/quote.ts` (`createPublicLink()`)
-  - 견적서 상세 페이지(관리자용)에서 실제 링크 생성 연동
+  - ✅ 견적서 상세 페이지(관리자용)에서 실제 링크 생성 연동
     - 더미 링크 생성 → 실제 Server Action 교체
-  - 클립보드 복사 기능 구현
+  - ✅ 클립보드 복사 기능 구현
     - 클라이언트 컴포넌트로 navigator.clipboard API 사용
-  - Playwright MCP로 공개 링크 생성 E2E 테스트
+  - ✅ Playwright MCP로 공개 링크 생성 E2E 테스트
     - 링크 생성 버튼 클릭 시 고유 ID 생성 확인
     - 생성된 링크가 화면에 표시되는지 확인
     - 링크 복사 기능 동작 확인
     - Notion 데이터베이스에 `public_link_id`가 업데이트되는지 확인
 
-- **Task 015: 견적서 공개 조회 기능 구현 (F003)**
-  - 공개 링크로 견적서 조회 함수 구현
+- ✅ **Task 015: 견적서 공개 조회 기능 구현 (F003)**
+  - ✅ 공개 링크로 견적서 조회 함수 구현
     - `/lib/notion/quotes.ts` (`getQuoteByPublicLink()`)
     - `public_link_id`로 Notion 데이터베이스 쿼리
-  - 견적서 상세 페이지(공개) Server Component 구현
+  - ✅ 견적서 상세 페이지(공개) Server Component 구현
     - `/app/quote/[publicId]/page.tsx`
     - 공개 링크 ID로 견적서 조회
     - 존재하지 않는 링크에 대한 404 처리
     - 유효기간 만료 견적서 처리 (선택사항)
-  - 더미 데이터 → 실제 Notion 데이터로 교체
-  - Playwright MCP로 공개 조회 E2E 테스트
+  - ✅ 더미 데이터 → 실제 Notion 데이터로 교체
+  - ✅ Playwright MCP로 공개 조회 E2E 테스트
     - 유효한 공개 링크로 접근 시 견적서 표시 확인
     - 인증 없이 접근 가능한지 확인
     - 잘못된 링크 접근 시 404 페이지 표시 확인
     - 견적서 정보가 정확히 렌더링되는지 확인
 
-- **Task 016: 견적서 상태 업데이트 기능 구현 (F005)**
-  - Notion API로 견적서 상태 업데이트 함수 구현
+- ✅ **Task 016: 견적서 상태 업데이트 기능 구현 (F005)**
+  - ✅ Notion API로 견적서 상태 업데이트 함수 구현
     - `/lib/notion/quotes.ts` (`updateQuoteStatus()`)
     - Notion `status` 필드 업데이트 (승인됨, 거부됨)
-  - 상태 업데이트 Server Action 구현
+  - ✅ 상태 업데이트 Server Action 구현
     - `/app/actions/quote.ts` (`approveQuote()`, `rejectQuote()`)
-  - 견적서 상세 페이지(공개)에서 승인/거부 버튼 연동
+  - ✅ 견적서 상세 페이지(공개)에서 승인/거부 버튼 연동
     - 더미 함수 → 실제 Server Action 교체
     - 상태 변경 후 성공 메시지 표시
     - 중복 클릭 방지 (낙관적 업데이트)
-  - Playwright MCP로 상태 업데이트 E2E 테스트
+  - ✅ Playwright MCP로 상태 업데이트 E2E 테스트
     - 승인 버튼 클릭 시 Notion 상태가 '승인됨'으로 변경되는지 확인
     - 거부 버튼 클릭 시 Notion 상태가 '거부됨'으로 변경되는지 확인
     - 성공 메시지가 화면에 표시되는지 확인
     - 관리자 대시보드에서 업데이트된 상태가 반영되는지 확인
 
-- **Task 017: 대시보드 통계 기능 구현 (F006)**
-  - 견적서 상태별 통계 계산 함수 구현
+- ✅ **Task 017: 대시보드 통계 기능 구현 (F006)**
+  - ✅ 견적서 상태별 통계 계산 함수 구현
     - `/lib/notion/stats.ts` (`getQuoteStats()`)
     - Notion API로 전체 견적서 조회 후 상태별 카운트
-  - 관리자 대시보드 통계 표시
+  - ✅ 관리자 대시보드 통계 표시
     - Server Component에서 통계 데이터 조회
     - 상태별 요약 카드에 실제 카운트 표시
     - 더미 데이터 → 실제 통계 데이터로 교체
-  - 검색 및 필터링 기능 구현
+  - ✅ 검색 및 필터링 기능 구현
     - 클라이언트 컴포넌트로 검색/필터 상태 관리
     - Server Action으로 필터링된 견적서 조회
-  - Playwright MCP로 대시보드 통계 E2E 테스트
+  - ✅ Playwright MCP로 대시보드 통계 E2E 테스트
     - 상태별 카운트가 정확히 표시되는지 확인
     - 검색 기능 동작 확인
     - 필터링 기능 동작 확인
@@ -361,18 +361,18 @@ Notion 데이터베이스 기반으로 견적서를 관리하고, 클라이언�
 
 ## 📊 진행 상황
 
-- **Phase 1**: 3/3 완료 (100%)
-- **Phase 2**: 7/7 완료 (100%)
-- **Phase 3**: 0/7 완료 (0%)
+- **Phase 1**: 3/3 완료 (100%) ✅
+- **Phase 2**: 7/7 완료 (100%) ✅
+- **Phase 3**: 7/7 완료 (100%) ✅
 - **Phase 4**: 0/5 완료 (0%)
-- **전체**: 10/22 완료 (45%)
+- **전체**: 17/22 완료 (77%)
 
 ## 🎯 다음 우선순위 작업
 
-1. **Task 011**: Notion API 연동 설정
-2. **Task 012**: 견적서 조회 API 구현 (F001)
-3. **Task 013**: NextAuth.js v5 인증 시스템 구현 (F010)
+1. **Task 018**: PDF 다운로드 기능 구현 (F004)
+2. **Task 019**: 에러 핸들링 및 사용자 경험 개선
+3. **Task 020**: 성능 최적화 및 캐싱 전략
 
 ---
 
-**마지막 업데이트**: 2026-01-12
+**마지막 업데이트**: 2026-01-13
