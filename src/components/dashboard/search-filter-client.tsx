@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState, useTransition } from 'react'
+import { useCallback, useRef, useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -25,7 +25,8 @@ export function SearchFilterClient() {
 
   // URL에서 초기 값 읽기
   const initialSearch = searchParams.get('search') || ''
-  const initialStatus = (searchParams.get('status') as QuoteStatus | 'all') || 'all'
+  const initialStatus =
+    (searchParams.get('status') as QuoteStatus | 'all') || 'all'
 
   const [searchValue, setSearchValue] = useState(initialSearch)
 
@@ -52,6 +53,8 @@ export function SearchFilterClient() {
     [router, searchParams]
   )
 
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   /**
    * 검색어 변경 핸들러 (디바운스 적용)
    */
@@ -59,12 +62,11 @@ export function SearchFilterClient() {
     (value: string) => {
       setSearchValue(value)
 
-      // 디바운스: 300ms 후 URL 업데이트
-      const timeoutId = setTimeout(() => {
+      // 이전 타임아웃 정리 후 디바운스 적용
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      timeoutRef.current = setTimeout(() => {
         updateSearchParams('search', value)
       }, 300)
-
-      return () => clearTimeout(timeoutId)
     },
     [updateSearchParams]
   )
@@ -82,17 +84,16 @@ export function SearchFilterClient() {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center">
       <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
-          placeholder="견적서 번호 또는 고객명으로 검색..."
+          placeholder="견적서 번호, 고객명, 프로젝트명 검색..."
           className="pl-10"
           value={searchValue}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          disabled={isPending}
+          onChange={e => handleSearchChange(e.target.value)}
         />
         {isPending && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="absolute top-1/2 right-3 -translate-y-1/2">
+            <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
           </div>
         )}
       </div>
@@ -112,6 +113,7 @@ export function SearchFilterClient() {
           <SelectItem value={QUOTE_STATUS.CONFIRMED}>확인됨</SelectItem>
           <SelectItem value={QUOTE_STATUS.APPROVED}>승인됨</SelectItem>
           <SelectItem value={QUOTE_STATUS.REJECTED}>거부됨</SelectItem>
+          <SelectItem value={QUOTE_STATUS.EXPIRED}>만료됨</SelectItem>
         </SelectContent>
       </Select>
     </div>
