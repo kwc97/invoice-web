@@ -51,7 +51,6 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* 로고 */}
           <Link href="/admin/dashboard" className="flex items-center space-x-2">
-            {/* 라이트 모드: 전체 로고 이미지 */}
             <Image
               src="/logo.png"
               alt="케이프로텍"
@@ -60,27 +59,14 @@ export function Header() {
               className="block h-10 w-auto dark:hidden"
               priority
             />
-            {/* 다크 모드: 아이콘 크롭 + 텍스트 */}
-            <div className="hidden items-center gap-1.5 dark:flex">
-              <div className="h-10 w-10 flex-shrink-0 overflow-hidden">
-                <Image
-                  src="/logo.png"
-                  alt="케이프로텍"
-                  width={180}
-                  height={40}
-                  className="h-10 w-auto"
-                  priority
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-[#F18D00]">
-                  케이프로텍
-                </span>
-                <span className="text-muted-foreground text-[10px]">
-                  KPROTEK Co.,Ltd.
-                </span>
-              </div>
-            </div>
+            <Image
+              src="/logo-dark.png"
+              alt="케이프로텍"
+              width={180}
+              height={40}
+              className="hidden h-10 w-auto dark:block"
+              priority
+            />
             <span className="text-xl font-bold">견적서 관리</span>
           </Link>
 

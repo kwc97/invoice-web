@@ -102,37 +102,23 @@ export default function Home() {
           <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
             {/* 로고 - 라이트/다크 모드별 전환 */}
             <div className="mb-8">
-              {/* 라이트 모드: 흰 배경 래퍼 + 전체 로고 */}
-              <div className="ring-border/50 inline-block rounded-xl bg-white px-5 py-3 shadow-sm ring-1 dark:hidden">
+              <div className="ring-border/50 inline-block rounded-xl bg-white px-5 py-3 shadow-sm ring-1 dark:bg-transparent dark:shadow-none dark:ring-0">
                 <Image
                   src="/logo.png"
                   alt="케이프로텍"
                   width={240}
                   height={56}
-                  className="h-14 w-auto"
+                  className="block h-14 w-auto dark:hidden"
                   priority
                 />
-              </div>
-              {/* 다크 모드: 아이콘 크롭 + 텍스트 */}
-              <div className="hidden items-center gap-3 dark:inline-flex">
-                <div className="h-16 w-16 flex-shrink-0 overflow-hidden">
-                  <Image
-                    src="/logo.png"
-                    alt="케이프로텍"
-                    width={240}
-                    height={56}
-                    className="h-16 w-auto"
-                    priority
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-3xl font-bold text-[#F18D00]">
-                    케이프로텍
-                  </span>
-                  <span className="text-muted-foreground text-sm">
-                    KPROTEK Co.,Ltd.
-                  </span>
-                </div>
+                <Image
+                  src="/logo-dark.png"
+                  alt="케이프로텍"
+                  width={240}
+                  height={56}
+                  className="hidden h-16 w-auto dark:block"
+                  priority
+                />
               </div>
             </div>
 
@@ -262,28 +248,24 @@ export default function Home() {
           <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
             {/* 회사 로고 및 이름 */}
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
-              {/* 라이트 모드: 전체 로고 */}
-              <div className="inline-block rounded-lg bg-white px-3 py-1.5 dark:hidden">
+              <div className="inline-block rounded-lg bg-white px-3 py-1.5 dark:bg-transparent dark:px-0 dark:py-0">
                 <Image
                   src="/logo.png"
                   alt="케이프로텍"
                   width={100}
                   height={24}
-                  className="h-6 w-auto"
+                  className="block h-6 w-auto dark:hidden"
                 />
-              </div>
-              {/* 다크 모드: 아이콘 크롭 */}
-              <div className="hidden h-7 w-7 flex-shrink-0 overflow-hidden dark:block">
                 <Image
-                  src="/logo.png"
+                  src="/logo-dark.png"
                   alt="케이프로텍"
                   width={100}
                   height={24}
-                  className="h-7 w-auto"
+                  className="hidden h-6 w-auto dark:block"
                 />
               </div>
               <div>
-                <p className="text-foreground text-sm font-medium dark:text-[#F18D00]">
+                <p className="text-foreground text-sm font-medium">
                   {COMPANY_INFO.name}
                 </p>
                 <p className="text-muted-foreground text-xs">
