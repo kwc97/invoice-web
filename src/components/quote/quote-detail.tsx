@@ -29,12 +29,41 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{quote.quoteNumber}</h1>
-          <p className="mt-1 text-muted-foreground">
+          <p className="text-muted-foreground mt-1">
             발행일: {quote.issueDate} | 유효기간: {quote.validUntil}
           </p>
         </div>
         <StatusBadge status={quote.status} />
       </div>
+
+      {/* 견적서 추가 정보 */}
+      {(quote.projectName || quote.recipient || quote.contactPerson) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>견적서 정보</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-3">
+            {quote.projectName && (
+              <div>
+                <p className="text-sm font-medium">프로젝트명</p>
+                <p className="text-muted-foreground">{quote.projectName}</p>
+              </div>
+            )}
+            {quote.recipient && (
+              <div>
+                <p className="text-sm font-medium">수신처</p>
+                <p className="text-muted-foreground">{quote.recipient}</p>
+              </div>
+            )}
+            {quote.contactPerson && (
+              <div>
+                <p className="text-sm font-medium">견적 담당자</p>
+                <p className="text-muted-foreground">{quote.contactPerson}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* 고객 정보 */}
       <Card>
@@ -78,18 +107,25 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12 text-center">No.</TableHead>
                 <TableHead>품목</TableHead>
                 <TableHead>설명</TableHead>
+                <TableHead className="w-16 text-center">단위</TableHead>
                 <TableHead className="text-right">수량</TableHead>
                 <TableHead className="text-right">단가</TableHead>
                 <TableHead className="text-right">금액</TableHead>
+                <TableHead className="w-24">비고</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {quote.items?.map((item) => (
+              {quote.items?.map((item, index) => (
                 <TableRow key={item.id}>
+                  <TableCell className="text-center">{index + 1}</TableCell>
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell>{item.description}</TableCell>
+                  <TableCell className="text-center">
+                    {item.unit || '-'}
+                  </TableCell>
                   <TableCell className="text-right">{item.quantity}</TableCell>
                   <TableCell className="text-right">
                     {CURRENCY.SYMBOL}
@@ -99,6 +135,7 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
                     {CURRENCY.SYMBOL}
                     {item.amount.toLocaleString()}
                   </TableCell>
+                  <TableCell>{item.remarks || '-'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -131,7 +168,7 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
             <CardTitle>비고</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="whitespace-pre-wrap text-muted-foreground">
+            <p className="text-muted-foreground whitespace-pre-wrap">
               {quote.notes}
             </p>
           </CardContent>

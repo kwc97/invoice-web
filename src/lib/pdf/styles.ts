@@ -1,251 +1,265 @@
 /**
  * PDF 문서 스타일 정의
- * @react-pdf/renderer의 StyleSheet.create()로 A4 기준 스타일 설정
+ * 회사 공식 견적서 양식 기반 레이아웃
  */
 
 import { StyleSheet } from '@react-pdf/renderer'
 
-/** 브랜딩 색상 */
+/** 색상 */
 const COLORS = {
-  primary: '#1a1a2e',
-  secondary: '#16213e',
-  accent: '#0f3460',
+  black: '#000000',
   text: '#1a1a1a',
-  textMuted: '#6b7280',
-  border: '#e5e7eb',
-  background: '#f9fafb',
+  textMuted: '#555555',
+  border: '#000000',
+  headerBg: '#f0f0f0',
+  totalBg: '#f5f5f5',
   white: '#ffffff',
-  red: '#dc2626',
 }
 
 export const styles = StyleSheet.create({
-  /** 페이지: A4 크기, 패딩 */
+  /** 페이지 */
   page: {
-    padding: 40,
-    fontSize: 10,
+    padding: 30,
+    fontSize: 9,
     fontFamily: 'NanumGothic',
     color: COLORS.text,
     backgroundColor: COLORS.white,
   },
 
-  /** 헤더 영역: 회사 정보 + 견적서 번호 */
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 30,
-    paddingBottom: 15,
-    borderBottomWidth: 2,
-    borderBottomColor: COLORS.primary,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  logoText: {
-    color: COLORS.primary,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  headerTitle: {
+  /** 견적서 제목 */
+  title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: COLORS.primary,
-  },
-  headerRight: {
-    alignItems: 'flex-end',
-  },
-  quoteNumber: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: COLORS.accent,
-    marginBottom: 4,
+    textAlign: 'center',
+    letterSpacing: 8,
+    marginBottom: 15,
   },
 
-  /** 견적서 정보: 발행일, 유효기간 */
-  infoSection: {
+  /** 상단 2컬럼 레이아웃 */
+  topSection: {
     flexDirection: 'row',
-    gap: 20,
-    marginBottom: 20,
+    marginBottom: 8,
   },
-  infoBox: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: COLORS.background,
-    borderRadius: 4,
+  topLeft: {
+    width: '50%',
+    paddingRight: 10,
+  },
+  topRight: {
+    width: '50%',
+    position: 'relative',
+  },
+
+  /** 도장 이미지 */
+  stampImage: {
+    position: 'absolute',
+    top: -5,
+    right: 5,
+    width: 65,
+    height: 65,
+    zIndex: 10,
+    opacity: 0.9,
+  },
+
+  /** 로고 텍스트 */
+  logoText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+
+  /** 견적 기본정보 행 */
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 3,
   },
   infoLabel: {
-    fontSize: 8,
-    color: COLORS.textMuted,
-    marginBottom: 3,
+    width: 65,
+    fontSize: 9,
     fontWeight: 'bold',
   },
   infoValue: {
-    fontSize: 11,
-    color: COLORS.text,
-  },
-  infoValueRed: {
-    fontSize: 11,
-    color: COLORS.red,
-    fontWeight: 'bold',
+    flex: 1,
+    fontSize: 9,
   },
 
-  /** 고객 정보 섹션 */
-  sectionTitle: {
-    fontSize: 12,
+  /** 견적 금액 영역 */
+  amountSection: {
+    marginTop: 6,
+  },
+  amountKorean: {
+    fontSize: 9,
+    marginBottom: 2,
+  },
+  amountNumber: {
+    fontSize: 13,
     fontWeight: 'bold',
-    color: COLORS.primary,
-    marginBottom: 8,
-    paddingBottom: 4,
+  },
+  amountVat: {
+    fontSize: 8,
+    fontWeight: 'normal',
+  },
+
+  /** 공급자 정보 테이블 */
+  supplierTable: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  supplierInner: {
+    flexDirection: 'row',
+  },
+  supplierSideLabelMerged: {
+    width: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRightWidth: 1,
+    borderRightColor: COLORS.border,
+    fontSize: 8,
+    fontWeight: 'bold',
+    gap: 2,
+  },
+  supplierContent: {
+    flex: 1,
+  },
+  supplierRow: {
+    flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  customerGrid: {
+  supplierRowLast: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
-    padding: 10,
-    backgroundColor: COLORS.background,
-    borderRadius: 4,
   },
-  customerItem: {
-    width: '48%',
-  },
-  customerLabel: {
+  supplierHeader: {
+    width: 65,
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    paddingVertical: 3,
+    borderRightWidth: 1,
+    borderRightColor: COLORS.border,
     fontSize: 8,
-    color: COLORS.textMuted,
-    marginBottom: 2,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
-  customerValue: {
-    fontSize: 10,
-    color: COLORS.text,
+  supplierValue: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    paddingVertical: 3,
+    fontSize: 8,
   },
 
-  /** 견적 항목 테이블 */
+  /** 견적담당자 바 */
+  contactBar: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.headerBg,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginBottom: 8,
+    fontSize: 9,
+  },
+
+  /** 항목 테이블 */
   table: {
-    marginBottom: 20,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: COLORS.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 4,
+    backgroundColor: COLORS.headerBg,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   tableHeaderText: {
-    color: COLORS.white,
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 'bold',
+    textAlign: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 2,
   },
   tableRow: {
     flexDirection: 'row',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  tableRowAlt: {
+  tableRowLast: {
     flexDirection: 'row',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    backgroundColor: COLORS.background,
   },
-  /** 테이블 컬럼 너비 */
-  colName: { width: '40%' },
-  colQty: { width: '15%', textAlign: 'right' },
-  colPrice: { width: '22%', textAlign: 'right' },
-  colAmount: { width: '23%', textAlign: 'right' },
+  tableTotalRow: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.totalBg,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+
+  /** 7컬럼 너비: Part No(7%), Description(28%), Unit(8%), Q'ty(8%), Unit Price(17%), Total Price(17%), Remarks(15%) */
+  colPartNo: { width: '7%', textAlign: 'center' },
+  colDesc: { width: '28%' },
+  colUnit: { width: '8%', textAlign: 'center' },
+  colQty: { width: '8%', textAlign: 'center' },
+  colUnitPrice: { width: '17%', textAlign: 'right' },
+  colTotalPrice: { width: '17%', textAlign: 'right' },
+  colRemarks: { width: '15%', textAlign: 'center' },
+
   cellText: {
-    fontSize: 9,
-    color: COLORS.text,
+    fontSize: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
   },
   cellTextBold: {
-    fontSize: 9,
-    color: COLORS.text,
-    fontWeight: 'bold',
-  },
-  cellDescription: {
     fontSize: 8,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-
-  /** 합계 영역 */
-  totalsContainer: {
-    alignItems: 'flex-end',
-    marginBottom: 20,
-  },
-  totalsBox: {
-    width: 220,
-  },
-  totalsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    fontWeight: 'bold',
     paddingVertical: 4,
+    paddingHorizontal: 3,
   },
-  totalsLabel: {
-    fontSize: 10,
-    color: COLORS.textMuted,
+  cellTextCenter: {
+    fontSize: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+    textAlign: 'center',
   },
-  totalsValue: {
-    fontSize: 10,
-    color: COLORS.text,
-  },
-  totalsDivider: {
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    marginVertical: 4,
-  },
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
-  },
-  totalLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-  },
-  totalValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: COLORS.primary,
+  cellTextRight: {
+    fontSize: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+    textAlign: 'right',
   },
 
-  /** 비고/안내사항 */
+  /** 컬럼 구분선 */
+  colBorder: {
+    borderRightWidth: 1,
+    borderRightColor: COLORS.border,
+  },
+
+  /** 견적 조건 */
   notesContainer: {
-    padding: 12,
-    backgroundColor: COLORS.background,
-    borderRadius: 4,
-    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: 10,
   },
   notesTitle: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 'bold',
-    color: COLORS.primary,
-    marginBottom: 6,
+    marginBottom: 5,
   },
   notesText: {
-    fontSize: 9,
+    fontSize: 8,
     color: COLORS.textMuted,
-    lineHeight: 1.5,
+    lineHeight: 1.6,
   },
 
   /** 푸터 */
   footer: {
     position: 'absolute',
-    bottom: 30,
-    left: 40,
-    right: 40,
+    bottom: 20,
+    left: 30,
+    right: 30,
     textAlign: 'center',
-    fontSize: 8,
+    fontSize: 7,
     color: COLORS.textMuted,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    paddingTop: 10,
+    borderTopColor: '#cccccc',
+    paddingTop: 8,
   },
 })

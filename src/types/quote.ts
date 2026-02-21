@@ -41,6 +41,10 @@ export interface QuoteItem {
   amount: number
   /** 연결된 견적서 ID */
   quoteId: string
+  /** 단위 (예: 인, 식, EA) */
+  unit?: string
+  /** 비고 */
+  remarks?: string
 }
 
 /**
@@ -65,6 +69,12 @@ export interface Quote {
   notes?: string
   /** 공개 링크 ID (null이면 생성되지 않음) */
   publicLinkId: string | null
+  /** 프로젝트명 (선택) */
+  projectName?: string
+  /** 수신처 (선택) */
+  recipient?: string
+  /** 견적 담당자 (선택) */
+  contactPerson?: string
 
   // 조인된 데이터 (선택적)
   /** 고객 정보 (조인 시에만 포함) */

@@ -75,6 +75,9 @@ export function mapNotionQuoteItemToQuoteItem(
   const quoteRelation = page.properties.Quotes?.relation ?? []
   const quoteId = quoteRelation.length > 0 ? quoteRelation[0].id : ''
 
+  const unit = extractRichText(page.properties.Unit?.rich_text)
+  const remarks = extractRichText(page.properties.Remarks?.rich_text)
+
   return {
     id: page.id,
     name: extractTitle(page.properties.Name?.title),
@@ -83,6 +86,8 @@ export function mapNotionQuoteItemToQuoteItem(
     unitPrice: page.properties['Unit Price']?.number ?? 0,
     amount: page.properties.Amount?.formula?.number ?? 0,
     quoteId,
+    ...(unit && { unit }),
+    ...(remarks && { remarks }),
   }
 }
 
@@ -116,6 +121,13 @@ export function mapNotionQuoteToQuote(
   const publicLinkId = extractRichText(
     page.properties['Public Link ID']?.rich_text
   )
+  const projectName = extractRichText(
+    page.properties['Project Name']?.rich_text
+  )
+  const recipient = extractRichText(page.properties.Recipient?.rich_text)
+  const contactPerson = extractRichText(
+    page.properties['Contact Person']?.rich_text
+  )
 
   // Total Amount는 'Total Amount ' (공백 포함!) + Rollup 타입
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,6 +146,9 @@ export function mapNotionQuoteToQuote(
     totalAmount,
     notes,
     publicLinkId: publicLinkId || null,
+    ...(projectName && { projectName }),
+    ...(recipient && { recipient }),
+    ...(contactPerson && { contactPerson }),
     createdTime: page.created_time,
     lastEditedTime: page.last_edited_time,
   }

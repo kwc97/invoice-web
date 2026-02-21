@@ -1,8 +1,7 @@
 import Image from 'next/image'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import type { Quote } from '@/types/quote'
-import { CURRENCY } from '@/lib/constants'
+import { CURRENCY, COMPANY_INFO } from '@/lib/constants'
+import { numberToKoreanCurrency } from '@/lib/utils'
 
 interface PublicQuoteViewProps {
   quote: Quote
@@ -11,158 +10,235 @@ interface PublicQuoteViewProps {
 
 /**
  * 공개 견적서 뷰 컴포넌트
- * 클라이언트 친화적 레이아웃
+ * 회사 공식 견적서 양식 레이아웃
  */
 export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
-  const subtotal = quote.totalAmount
-  const total = subtotal
+  const total = quote.totalAmount
+  const koreanAmount = numberToKoreanCurrency(total)
 
   return (
-    <Card className="mx-auto max-w-4xl">
-      <CardContent className="p-8">
-        {/* 헤더 */}
-        <div className="mb-8 text-center">
-          <div className="mb-4 flex items-center justify-center">
-            <Image
-              src="/logo.png"
-              alt="케이프로텍"
-              width={220}
-              height={48}
-              className="h-12 w-auto"
-              priority
+    <div className="mx-auto max-w-4xl bg-white text-black print:shadow-none">
+      <div className="p-8">
+        {/* 견적서 제목 */}
+        <h1 className="mb-6 text-center text-3xl font-bold tracking-[0.5em]">
+          견 적 서
+        </h1>
+
+        {/* 상단: 좌측 견적정보 + 우측 공급자 정보 */}
+        <div className="mb-4 grid grid-cols-2 gap-6">
+          {/* 좌측: 로고 + 견적 기본정보 */}
+          <div className="space-y-2">
+            <div className="mb-3">
+              <Image
+                src="/logo.png"
+                alt="케이프로텍"
+                width={200}
+                height={44}
+                className="h-11 w-auto"
+                priority
+              />
+            </div>
+            <InfoRow label="NO." value={quote.quoteNumber} />
+            <InfoRow label="견적일자" value={quote.issueDate} />
+            {quote.projectName && (
+              <InfoRow label="Project명" value={quote.projectName} />
+            )}
+            <InfoRow
+              label="수 신"
+              value={quote.recipient || quote.customer?.name || '-'}
             />
-          </div>
-          <h1 className="text-2xl font-bold">견적서</h1>
-          <p className="mt-2 text-muted-foreground">{quote.quoteNumber}</p>
-        </div>
-
-        <Separator className="my-6" />
-
-        {/* 견적서 정보 */}
-        <div className="mb-6 grid gap-4 md:grid-cols-2">
-          <div>
-            <p className="text-sm font-medium">발행일</p>
-            <p className="text-muted-foreground">{quote.issueDate}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium">유효기간</p>
-            <p className="font-medium text-red-600">{quote.validUntil}</p>
-          </div>
-        </div>
-
-        {/* 고객 정보 */}
-        <div className="mb-6">
-          <h2 className="mb-3 text-lg font-semibold">고객 정보</h2>
-          <div className="rounded-lg bg-muted/50 p-4">
-            <div className="grid gap-3 md:grid-cols-2">
-              <div>
-                <p className="text-sm font-medium">고객명</p>
-                <p className="text-muted-foreground">{quote.customer?.name}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">회사명</p>
-                <p className="text-muted-foreground">
-                  {quote.customer?.company || '-'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">이메일</p>
-                <p className="text-muted-foreground">
-                  {quote.customer?.email || '-'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">전화번호</p>
-                <p className="text-muted-foreground">
-                  {quote.customer?.phone || '-'}
-                </p>
-              </div>
+            <div className="mt-3 space-y-1">
+              <p className="text-sm">
+                <span className="font-medium">견적 금액: </span>
+                <span>(일금 {koreanAmount}원)</span>
+              </p>
+              <p className="text-lg font-bold">
+                {'     '}
+                {CURRENCY.SYMBOL}
+                {total.toLocaleString()}{' '}
+                <span className="text-sm font-normal">&lt;부가세별도&gt;</span>
+              </p>
             </div>
           </div>
-        </div>
 
-        {/* 견적 항목 */}
-        <div className="mb-6">
-          <h2 className="mb-3 text-lg font-semibold">견적 내역</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">
-                    품목
-                  </th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">
-                    수량
-                  </th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">
-                    단가
-                  </th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">
-                    금액
-                  </th>
-                </tr>
-              </thead>
+          {/* 우측: 공급자 정보 테이블 */}
+          <div className="relative border border-black">
+            {/* 도장 이미지 */}
+            <Image
+              src="/stamp.png"
+              alt="직인"
+              width={90}
+              height={90}
+              className="absolute -top-2 right-2 z-10 h-[90px] w-[90px] opacity-90"
+            />
+            <table className="w-full text-sm">
               <tbody>
-                {quote.items?.map((item, index) => (
-                  <tr
-                    key={item.id}
-                    className={
-                      index % 2 === 0 ? 'bg-background' : 'bg-muted/20'
-                    }
+                <tr>
+                  <td
+                    rowSpan={5}
+                    className="w-6 border border-black p-1 text-center text-xs font-bold"
+                    style={{
+                      writingMode: 'vertical-rl',
+                      letterSpacing: '0.3em',
+                    }}
                   >
-                    <td className="px-4 py-3">
-                      <p className="font-medium">{item.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {item.description}
-                      </p>
-                    </td>
-                    <td className="px-4 py-3 text-right">{item.quantity}</td>
-                    <td className="px-4 py-3 text-right">
-                      {CURRENCY.SYMBOL}
-                      {item.unitPrice.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium">
-                      {CURRENCY.SYMBOL}
-                      {item.amount.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
+                    공급자
+                  </td>
+                  <td className="w-24 border border-black p-1 text-center text-xs font-medium">
+                    사업자번호
+                  </td>
+                  <td className="border border-black p-1 text-xs">
+                    {COMPANY_INFO.businessNumber}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="w-24 border border-black p-1 text-center text-xs font-medium">
+                    상호
+                  </td>
+                  <td className="border border-black p-1 text-xs">
+                    {COMPANY_INFO.name} 대표: {COMPANY_INFO.representative}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="w-24 border border-black p-1 text-center text-xs font-medium">
+                    소재지
+                  </td>
+                  <td className="border border-black p-1 text-xs">
+                    {COMPANY_INFO.address}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="w-24 border border-black p-1 text-center text-xs font-medium">
+                    업태/종목
+                  </td>
+                  <td className="border border-black p-1 text-xs">
+                    {COMPANY_INFO.businessType} /{' '}
+                    {COMPANY_INFO.businessCategory}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="w-24 border border-black p-1 text-center text-xs font-medium">
+                    TEL / FAX
+                  </td>
+                  <td className="border border-black p-1 text-xs">
+                    {COMPANY_INFO.tel} / {COMPANY_INFO.fax}
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* 합계 */}
-        <div className="mb-6 flex justify-end">
-          <div className="w-full max-w-sm space-y-2">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">소계</span>
-              <span className="font-medium">
-                {CURRENCY.SYMBOL}
-                {subtotal.toLocaleString()}
-              </span>
-            </div>
-            <Separator />
-            <div className="flex justify-between text-xl font-bold">
-              <span>총액</span>
-              <span className="text-primary">
-                {CURRENCY.SYMBOL}
-                {total.toLocaleString()}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* 비고 */}
-        {quote.notes && (
-          <div className="rounded-lg bg-muted/50 p-4">
-            <h3 className="mb-2 font-semibold">안내사항</h3>
-            <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-              {quote.notes}
-            </p>
+        {/* 견적 담당자 바 */}
+        {quote.contactPerson && (
+          <div className="mb-4 border border-black bg-gray-50 px-4 py-2 text-sm">
+            <span className="font-medium">견적담당자: </span>
+            {quote.contactPerson}
           </div>
         )}
-      </CardContent>
-    </Card>
+
+        {/* 견적 항목 테이블 (7컬럼) */}
+        <div className="mb-4 overflow-x-auto">
+          <table className="w-full border-collapse border border-black text-sm">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="w-[7%] border border-black px-2 py-2 text-center">
+                  Part No
+                </th>
+                <th className="w-[28%] border border-black px-2 py-2 text-center">
+                  Description
+                </th>
+                <th className="w-[8%] border border-black px-2 py-2 text-center">
+                  Unit
+                </th>
+                <th className="w-[8%] border border-black px-2 py-2 text-center">
+                  Q&apos;ty
+                </th>
+                <th className="w-[17%] border border-black px-2 py-2 text-center">
+                  Unit Price
+                </th>
+                <th className="w-[17%] border border-black px-2 py-2 text-center">
+                  Total Price
+                </th>
+                <th className="w-[15%] border border-black px-2 py-2 text-center">
+                  Remarks
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {quote.items?.map((item, index) => (
+                <tr key={item.id}>
+                  <td className="border border-black px-2 py-1.5 text-center">
+                    {index + 1}.
+                  </td>
+                  <td className="border border-black px-2 py-1.5">
+                    {item.name}
+                    {item.description && (
+                      <span className="ml-1 text-xs text-gray-500">
+                        ({item.description})
+                      </span>
+                    )}
+                  </td>
+                  <td className="border border-black px-2 py-1.5 text-center">
+                    {item.unit || '-'}
+                  </td>
+                  <td className="border border-black px-2 py-1.5 text-center">
+                    {item.quantity}
+                  </td>
+                  <td className="border border-black px-2 py-1.5 text-right">
+                    {item.unitPrice.toLocaleString()}
+                  </td>
+                  <td className="border border-black px-2 py-1.5 text-right">
+                    {item.amount.toLocaleString()}
+                  </td>
+                  <td className="border border-black px-2 py-1.5 text-center">
+                    {item.remarks || ''}
+                  </td>
+                </tr>
+              ))}
+              {/* Total 행 */}
+              <tr className="bg-gray-50 font-bold">
+                <td className="border border-black px-2 py-2 text-center" />
+                <td className="border border-black px-2 py-2 text-center">
+                  Total
+                </td>
+                <td className="border border-black px-2 py-2" />
+                <td className="border border-black px-2 py-2" />
+                <td className="border border-black px-2 py-2" />
+                <td className="border border-black px-2 py-2 text-right">
+                  {CURRENCY.SYMBOL}
+                  {total.toLocaleString()}
+                </td>
+                <td className="border border-black px-2 py-2 text-center text-xs font-normal">
+                  부가세별도
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* 견적 조건 */}
+        {quote.notes && (
+          <div className="border border-black p-4 text-sm">
+            <p className="mb-2 font-bold">* 견적 조건</p>
+            <div className="space-y-1">
+              {quote.notes.split('\n').map((line, i) => (
+                <p key={i}>{line}</p>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/** 견적 기본정보 행 */
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <p className="text-sm">
+      <span className="inline-block w-20 font-medium">{label}</span>
+      <span>: {value}</span>
+    </p>
   )
 }

@@ -138,6 +138,10 @@ export interface NotionQuoteItemPage {
     Amount: NotionFormula
     /** 연결된 견적서 (Relation) */
     Quotes: NotionRelation
+    /** 단위 (Rich Text, 선택) */
+    Unit?: NotionRichText
+    /** 비고 (Rich Text, 선택) */
+    Remarks?: NotionRichText
   }
 }
 
@@ -170,6 +174,12 @@ export interface NotionQuotePage {
     'Public Link ID': NotionRichText
     /** 견적 항목들 (Relation) */
     'Quote Items': NotionRelation
+    /** 프로젝트명 (Rich Text, 선택) */
+    'Project Name'?: NotionRichText
+    /** 수신처 (Rich Text, 선택) */
+    Recipient?: NotionRichText
+    /** 견적 담당자 (Rich Text, 선택) */
+    'Contact Person'?: NotionRichText
   }
 }
 
