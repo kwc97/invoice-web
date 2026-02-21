@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import { Container } from './container'
@@ -50,9 +51,14 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* 로고 */}
           <Link href="/admin/dashboard" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <span className="text-lg font-bold">Q</span>
-            </div>
+            <Image
+              src="/logo.png"
+              alt="케이프로텍"
+              width={180}
+              height={40}
+              className="h-10 w-auto"
+              priority
+            />
             <span className="text-xl font-bold">견적서 관리</span>
           </Link>
 

@@ -51,16 +51,14 @@ export function QuoteDocument({ quote }: QuoteDocumentProps) {
   return (
     <Document
       title={`견적서 - ${quote.quoteNumber}`}
-      author="견적서 관리 시스템"
+      author="KPROTEK Co.,Ltd."
       subject={`견적서 ${quote.quoteNumber}`}
     >
       <Page size="A4" style={styles.page}>
         {/* 헤더: 회사 로고 + 견적서 제목 */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <View style={styles.logo}>
-              <Text style={styles.logoText}>Q</Text>
-            </View>
+            <Text style={styles.logoText}>KPROTEK</Text>
             <Text style={styles.headerTitle}>견적서</Text>
           </View>
           <View style={styles.headerRight}>

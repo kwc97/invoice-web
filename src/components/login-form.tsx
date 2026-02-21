@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
+import Image from 'next/image'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -66,11 +67,25 @@ export function LoginForm() {
 
   return (
     <Card className="mx-auto w-full max-w-md">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-center text-2xl font-bold">로그인</CardTitle>
-        <CardDescription className="text-center">
-          관리자 계정으로 로그인하세요
-        </CardDescription>
+      <CardHeader className="space-y-4">
+        <div className="flex justify-center">
+          <Image
+            src="/logo.png"
+            alt="케이프로텍"
+            width={220}
+            height={48}
+            className="h-12 w-auto"
+            priority
+          />
+        </div>
+        <div className="space-y-1">
+          <CardTitle className="text-center text-2xl font-bold">
+            로그인
+          </CardTitle>
+          <CardDescription className="text-center">
+            관리자 계정으로 로그인하세요
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>

@@ -16,10 +16,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | 견적서 관리 시스템',
-    default: '견적서 관리 시스템',
+    template: '%s | KPROTEK 견적서 관리',
+    default: 'KPROTEK 견적서 관리',
   },
-  description: 'Notion 기반 견적서 관리 및 클라이언트 공유 시스템',
+  description: 'KPROTEK 견적서 관리 및 클라이언트 공유 시스템',
 }
 
 export default function RootLayout({
@@ -34,8 +34,7 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
           disableTransitionOnChange
         >
           {children}

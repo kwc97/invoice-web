@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import type { Quote } from '@/types/quote'
@@ -22,9 +23,14 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
         {/* 헤더 */}
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <span className="text-2xl font-bold">Q</span>
-            </div>
+            <Image
+              src="/logo.png"
+              alt="케이프로텍"
+              width={220}
+              height={48}
+              className="h-12 w-auto"
+              priority
+            />
           </div>
           <h1 className="text-2xl font-bold">견적서</h1>
           <p className="mt-2 text-muted-foreground">{quote.quoteNumber}</p>

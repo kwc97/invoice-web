@@ -43,17 +43,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  logo: {
-    width: 36,
-    height: 36,
-    backgroundColor: COLORS.primary,
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   logoText: {
-    color: COLORS.white,
-    fontSize: 18,
+    color: COLORS.primary,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   headerTitle: {

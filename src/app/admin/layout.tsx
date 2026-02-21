@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     template: '%s | 견적서 관리',
     default: '관리자',
   },
-  description: 'Notion 기반 견적서 관리 시스템 - 관리자 페이지',
+  description: 'KPROTEK 견적서 관리 - 관리자 페이지',
 }
 
 /**

@@ -14,7 +14,7 @@ export function Footer() {
         <div className="py-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} 견적서 관리 시스템. All rights reserved.
+              © {currentYear} KPROTEK Co.,Ltd. All rights reserved.
             </p>
             <div className="flex gap-4">
               <Link
