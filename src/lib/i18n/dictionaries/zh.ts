@@ -1,0 +1,63 @@
+import type { Dictionary } from '../types'
+
+/** 중국어 사전 */
+export const zh: Dictionary = {
+  quote: {
+    title: '报 价 单',
+    no: '编号',
+    issueDate: '日期',
+    projectName: '项目名称',
+    recipient: '收件人',
+    quoteAmount: '报价金额',
+    vatExcluded: '不含增值税',
+    contactPerson: '联系人',
+    termsAndConditions: '* 报价条件',
+    total: '合计',
+  },
+  supplier: {
+    label: '供应商',
+    businessNumber: '营业执照号',
+    companyName: '公司名称',
+    address: '地址',
+    businessType: '业务类型',
+    telFax: '电话 / 传真',
+    representativeLabel: '代表',
+    values: {
+      companyName: 'KPROTEK Co., Ltd.',
+      representative: '申昌君',
+      address: '韩国京畿道平泽市五城西路5-67',
+      businessType: '建筑业, 制造业, 批发/零售',
+      businessCategory: '机械安装, 机械设备, 机械装备',
+    },
+  },
+  table: {
+    partNo: '序号',
+    description: '品名',
+    unit: '单位',
+    qty: '数量',
+    unitPrice: '单价',
+    totalPrice: '金额',
+    remarks: '备注',
+  },
+  actions: {
+    downloadPdf: '下载PDF',
+    approve: '批准',
+    reject: '拒绝',
+  },
+  messages: {
+    approved: '此报价单已被批准。',
+    rejected: '此报价单已被拒绝。',
+    approveSuccess: '报价单已批准，我们的负责人将尽快与您联系。',
+    rejectSuccess: '报价单已被拒绝。',
+    pdfDownloaded: 'PDF下载完成',
+    pdfFailed: 'PDF下载失败',
+    expiredTitle: '此报价单已过期',
+    expiredDescription:
+      '此报价单的有效期已过，不再有效。如需最新报价，请联系我们的负责人申请新的报价单。',
+    expiredContact: '申请新报价',
+  },
+  koreanAmount: {
+    prefix: null,
+    suffix: null,
+  },
+}
