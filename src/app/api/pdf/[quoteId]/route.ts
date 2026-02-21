@@ -1,12 +1,14 @@
 /**
  * PDF 생성 API Route
- * 견적서 ID를 받아 서버사이드에서 PDF를 생성하여 반환
+ * 견적서 ID를 받아 서버사이드에서 PDF를 생성하여 반환 (다국어 지원)
  */
 
 import { NextResponse } from 'next/server'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { getQuoteById } from '@/lib/notion/quotes'
 import { QuoteDocument } from '@/lib/pdf/document'
+import { getDictionary, translateQuoteContent } from '@/lib/i18n'
+import { formatDateByLanguage } from '@/lib/i18n/format'
 
 interface RouteContext {
   params: Promise<{ quoteId: string }>
@@ -38,16 +40,34 @@ export async function GET(_request: Request, context: RouteContext) {
       )
     }
 
+    const lang = quote.language ?? 'ko'
+    const dict = getDictionary(lang)
+
+    // 동적 콘텐츠 번역 (한국어 외)
+    const translatedQuote =
+      lang !== 'ko' ? await translateQuoteContent(quote, lang) : quote
+
+    // 날짜 포맷 변환
+    const formattedQuote = {
+      ...translatedQuote,
+      issueDate: formatDateByLanguage(translatedQuote.issueDate, lang),
+      validUntil: formatDateByLanguage(translatedQuote.validUntil, lang),
+    }
+
     // PDF 생성 (서버사이드 렌더링)
     const pdfBuffer = await renderToBuffer(
-      QuoteDocument({ quote }) as React.JSX.Element
+      QuoteDocument({
+        quote: formattedQuote,
+        dictionary: dict,
+      }) as React.JSX.Element
     )
 
     // Buffer → Uint8Array 변환 (Response 호환)
     const pdfBytes = new Uint8Array(pdfBuffer)
 
-    // PDF 파일명 (한글 인코딩 처리)
-    const filename = `quote-${quote.quoteNumber}.pdf`
+    // PDF 파일명 (언어별 + 한글 인코딩 처리)
+    const titleForFile = dict.quote.title.replace(/\s+/g, '')
+    const filename = `${titleForFile}_${quote.quoteNumber}.pdf`
     const encodedFilename = encodeURIComponent(filename)
 
     return new Response(pdfBytes, {

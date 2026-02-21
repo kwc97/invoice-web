@@ -1,34 +1,18 @@
 /**
  * 견적서 PDF 문서 컴포넌트
- * 회사 공식 견적서 양식 기반 레이아웃
+ * 회사 공식 견적서 양식 기반 레이아웃 (다국어 지원)
  */
 
-import { Document, Page, View, Text, Font, Image } from '@react-pdf/renderer'
+import { Document, Page, View, Text, Image } from '@react-pdf/renderer'
 import type { Quote } from '@/types/quote'
+import type { Dictionary } from '@/lib/i18n/types'
 import { COMPANY_INFO } from '@/lib/constants'
 import { numberToKoreanCurrency } from '@/lib/utils'
-import { styles } from './styles'
+import { createStyles } from './styles'
 
-/**
- * 한글 폰트 등록 (Nanum Gothic - TTF)
- * @react-pdf/renderer는 TTF 포맷만 지원 (OTF/WOFF 미지원)
- */
-Font.register({
-  family: 'NanumGothic',
-  fonts: [
-    {
-      src: 'https://fonts.gstatic.com/ea/nanumgothic/v5/NanumGothic-Regular.ttf',
-      fontWeight: 400,
-    },
-    {
-      src: 'https://fonts.gstatic.com/ea/nanumgothic/v5/NanumGothic-Bold.ttf',
-      fontWeight: 700,
-    },
-  ],
-})
-
-/** 하이픈 콜백 비활성화 (한글은 하이픈 불필요) */
-Font.registerHyphenationCallback(word => [word])
+// 폰트 등록 (사이드이펙트)
+import './fonts'
+import { getFontFamily } from './fonts'
 
 /** 통화 기호 */
 const WON = '\u20A9'
@@ -40,25 +24,27 @@ function fmt(amount: number): string {
 
 interface QuoteDocumentProps {
   quote: Quote
+  dictionary: Dictionary
 }
 
 /**
- * 견적서 PDF 문서
- * 회사 공식 견적서 양식과 동일한 구조
+ * 견적서 PDF 문서 (다국어 지원)
  */
-export function QuoteDocument({ quote }: QuoteDocumentProps) {
+export function QuoteDocument({ quote, dictionary: dict }: QuoteDocumentProps) {
   const total = quote.totalAmount
-  const koreanAmount = numberToKoreanCurrency(total)
+  const showKoreanAmount = dict.koreanAmount.prefix !== null
+  const fontFamily = getFontFamily(quote.language ?? 'ko')
+  const styles = createStyles(fontFamily)
 
   return (
     <Document
-      title={`견적서 - ${quote.quoteNumber}`}
+      title={`${dict.quote.title} - ${quote.quoteNumber}`}
       author="KPROTEK Co.,Ltd."
-      subject={`견적서 ${quote.quoteNumber}`}
+      subject={`${dict.quote.title} ${quote.quoteNumber}`}
     >
       <Page size="A4" style={styles.page}>
         {/* 견적서 제목 */}
-        <Text style={styles.title}>견 적 서</Text>
+        <Text style={styles.title}>{dict.quote.title}</Text>
 
         {/* 상단: 좌측 견적정보 + 우측 공급자 */}
         <View style={styles.topSection}>
@@ -67,21 +53,21 @@ export function QuoteDocument({ quote }: QuoteDocumentProps) {
             <Text style={styles.logoText}>KPROTEK</Text>
 
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>NO.</Text>
+              <Text style={styles.infoLabel}>{dict.quote.no}</Text>
               <Text style={styles.infoValue}>: {quote.quoteNumber}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>견적일자</Text>
+              <Text style={styles.infoLabel}>{dict.quote.issueDate}</Text>
               <Text style={styles.infoValue}>: {quote.issueDate}</Text>
             </View>
             {quote.projectName && (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Project명</Text>
+                <Text style={styles.infoLabel}>{dict.quote.projectName}</Text>
                 <Text style={styles.infoValue}>: {quote.projectName}</Text>
               </View>
             )}
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>수 신</Text>
+              <Text style={styles.infoLabel}>{dict.quote.recipient}</Text>
               <Text style={styles.infoValue}>
                 : {quote.recipient || quote.customer?.name || '-'}
               </Text>
@@ -89,14 +75,24 @@ export function QuoteDocument({ quote }: QuoteDocumentProps) {
 
             {/* 견적 금액 */}
             <View style={styles.amountSection}>
-              <Text style={styles.amountKorean}>
-                견적 금액: (일금 {koreanAmount}원)
-              </Text>
+              {showKoreanAmount ? (
+                <Text style={styles.amountKorean}>
+                  {dict.quote.quoteAmount}: ({dict.koreanAmount.prefix}
+                  {numberToKoreanCurrency(total)}
+                  {dict.koreanAmount.suffix})
+                </Text>
+              ) : (
+                <Text style={styles.amountKorean}>
+                  {dict.quote.quoteAmount}:
+                </Text>
+              )}
               <Text style={styles.amountNumber}>
                 {'     '}
                 {WON}
                 {fmt(total)}{' '}
-                <Text style={styles.amountVat}>&lt;부가세별도&gt;</Text>
+                <Text style={styles.amountVat}>
+                  &lt;{dict.quote.vatExcluded}&gt;
+                </Text>
               </Text>
             </View>
           </View>
@@ -107,33 +103,38 @@ export function QuoteDocument({ quote }: QuoteDocumentProps) {
             <Image src="/stamp.png" style={styles.stampImage} />
             <View style={styles.supplierTable}>
               <View style={styles.supplierInner}>
-                {/* 좌측: 공급자 세로 라벨 (하나로 합침) */}
+                {/* 좌측: 공급자 세로 라벨 */}
                 <View style={styles.supplierSideLabelMerged}>
-                  <Text>공</Text>
-                  <Text>급</Text>
-                  <Text>자</Text>
+                  {dict.supplier.label.split('').map((char, i) => (
+                    <Text key={i}>{char}</Text>
+                  ))}
                 </View>
                 {/* 우측: 정보 행들 */}
                 <View style={styles.supplierContent}>
                   <SupplierInfoRow
-                    header="사업자번호"
+                    header={dict.supplier.businessNumber}
                     value={COMPANY_INFO.businessNumber}
+                    styles={styles}
                   />
                   <SupplierInfoRow
-                    header="상호"
-                    value={`${COMPANY_INFO.name}  대표: ${COMPANY_INFO.representative}`}
+                    header={dict.supplier.companyName}
+                    value={`${dict.supplier.values.companyName}  ${dict.supplier.representativeLabel}: ${dict.supplier.values.representative}`}
+                    styles={styles}
                   />
                   <SupplierInfoRow
-                    header="소재지"
-                    value={COMPANY_INFO.address}
+                    header={dict.supplier.address}
+                    value={dict.supplier.values.address}
+                    styles={styles}
                   />
                   <SupplierInfoRow
-                    header="업태 / 종목"
-                    value={`${COMPANY_INFO.businessType} / ${COMPANY_INFO.businessCategory}`}
+                    header={dict.supplier.businessType}
+                    value={`${dict.supplier.values.businessType} / ${dict.supplier.values.businessCategory}`}
+                    styles={styles}
                   />
                   <SupplierInfoRow
-                    header="TEL / FAX"
+                    header={dict.supplier.telFax}
                     value={`${COMPANY_INFO.tel} / ${COMPANY_INFO.fax}`}
+                    styles={styles}
                     isLast
                   />
                 </View>
@@ -145,7 +146,9 @@ export function QuoteDocument({ quote }: QuoteDocumentProps) {
         {/* 견적담당자 바 */}
         {quote.contactPerson && (
           <View style={styles.contactBar}>
-            <Text>견적담당자: {quote.contactPerson}</Text>
+            <Text>
+              {dict.quote.contactPerson}: {quote.contactPerson}
+            </Text>
           </View>
         )}
 
@@ -154,25 +157,29 @@ export function QuoteDocument({ quote }: QuoteDocumentProps) {
           {/* 헤더 */}
           <View style={styles.tableHeader}>
             <View style={[styles.colPartNo, styles.colBorder]}>
-              <Text style={styles.tableHeaderText}>Part No</Text>
+              <Text style={styles.tableHeaderText}>{dict.table.partNo}</Text>
             </View>
             <View style={[styles.colDesc, styles.colBorder]}>
-              <Text style={styles.tableHeaderText}>Description</Text>
+              <Text style={styles.tableHeaderText}>
+                {dict.table.description}
+              </Text>
             </View>
             <View style={[styles.colUnit, styles.colBorder]}>
-              <Text style={styles.tableHeaderText}>Unit</Text>
+              <Text style={styles.tableHeaderText}>{dict.table.unit}</Text>
             </View>
             <View style={[styles.colQty, styles.colBorder]}>
-              <Text style={styles.tableHeaderText}>Q&apos;ty</Text>
+              <Text style={styles.tableHeaderText}>{dict.table.qty}</Text>
             </View>
             <View style={[styles.colUnitPrice, styles.colBorder]}>
-              <Text style={styles.tableHeaderText}>Unit Price</Text>
+              <Text style={styles.tableHeaderText}>{dict.table.unitPrice}</Text>
             </View>
             <View style={[styles.colTotalPrice, styles.colBorder]}>
-              <Text style={styles.tableHeaderText}>Total Price</Text>
+              <Text style={styles.tableHeaderText}>
+                {dict.table.totalPrice}
+              </Text>
             </View>
             <View style={styles.colRemarks}>
-              <Text style={styles.tableHeaderText}>Remarks</Text>
+              <Text style={styles.tableHeaderText}>{dict.table.remarks}</Text>
             </View>
           </View>
 
@@ -212,7 +219,10 @@ export function QuoteDocument({ quote }: QuoteDocumentProps) {
               <Text style={styles.cellText} />
             </View>
             <View style={[styles.colDesc, styles.colBorder]}>
-              <Text style={styles.cellTextBold}>{'          Total'}</Text>
+              <Text style={styles.cellTextBold}>
+                {'          '}
+                {dict.quote.total}
+              </Text>
             </View>
             <View style={[styles.colUnit, styles.colBorder]}>
               <Text style={styles.cellText} />
@@ -230,7 +240,9 @@ export function QuoteDocument({ quote }: QuoteDocumentProps) {
               </Text>
             </View>
             <View style={styles.colRemarks}>
-              <Text style={styles.cellTextCenter}>&lt;부가세별도&gt;</Text>
+              <Text style={styles.cellTextCenter}>
+                &lt;{dict.quote.vatExcluded}&gt;
+              </Text>
             </View>
           </View>
         </View>
@@ -238,7 +250,9 @@ export function QuoteDocument({ quote }: QuoteDocumentProps) {
         {/* 견적 조건 */}
         {quote.notes && (
           <View style={styles.notesContainer}>
-            <Text style={styles.notesTitle}>* 견적 조건</Text>
+            <Text style={styles.notesTitle}>
+              {dict.quote.termsAndConditions}
+            </Text>
             {quote.notes.split('\n').map((line, i) => (
               <Text key={i} style={styles.notesText}>
                 {line}
@@ -260,14 +274,17 @@ export function QuoteDocument({ quote }: QuoteDocumentProps) {
   )
 }
 
-/** 공급자 정보 행 (사이드 라벨 없이 헤더+값만) */
+/** 공급자 정보 행 */
 function SupplierInfoRow({
   header,
   value,
+  styles,
   isLast,
 }: {
   header: string
   value: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  styles: any
   isLast?: boolean
 }) {
   return (
