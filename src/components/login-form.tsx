@@ -69,6 +69,7 @@ export function LoginForm() {
     <Card className="mx-auto w-full max-w-md">
       <CardHeader className="space-y-4">
         <div className="flex justify-center">
+          {/* 라이트 모드: 전체 로고 이미지 */}
           <Image
             src="/logo.png"
             alt="케이프로텍"
@@ -77,14 +78,27 @@ export function LoginForm() {
             className="block h-12 w-auto dark:hidden"
             priority
           />
-          <Image
-            src="/logo-dark.png"
-            alt="케이프로텍"
-            width={220}
-            height={48}
-            className="hidden h-12 w-auto dark:block"
-            priority
-          />
+          {/* 다크 모드: 아이콘 크롭 + 텍스트 */}
+          <div className="hidden items-center gap-2 dark:flex">
+            <div className="h-12 w-12 flex-shrink-0 overflow-hidden">
+              <Image
+                src="/logo.png"
+                alt="케이프로텍"
+                width={220}
+                height={48}
+                className="h-12 w-auto"
+                priority
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-[#F18D00]">
+                케이프로텍
+              </span>
+              <span className="text-muted-foreground text-xs">
+                KPROTEK Co.,Ltd.
+              </span>
+            </div>
+          </div>
         </div>
         <div className="space-y-1">
           <CardTitle className="text-center text-2xl font-bold">
