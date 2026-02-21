@@ -25,11 +25,11 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth'
-import { dummyLogin } from '@/lib/auth-dummy'
+import { login } from '@/app/actions/auth'
 
 /**
  * 로그인 폼 컴포넌트
- * React Hook Form + Zod 검증 스키마 사용
+ * React Hook Form + Zod 검증 스키마 + NextAuth.js Server Action 사용
  */
 export function LoginForm() {
   const router = useRouter()
@@ -47,16 +47,21 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
 
-    const result = await dummyLogin(data.email, data.password)
+    try {
+      const result = await login(data.email, data.password)
 
-    if (result.success) {
-      toast.success(result.message)
-      router.push('/admin/dashboard')
-    } else {
-      toast.error(result.message)
+      if (result.success) {
+        toast.success('로그인 성공')
+        router.push('/admin/dashboard')
+        router.refresh() // 세션 상태 갱신
+      } else {
+        toast.error(result.error || '로그인에 실패했습니다.')
+      }
+    } catch {
+      toast.error('로그인 중 오류가 발생했습니다.')
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }
 
   return (
@@ -80,6 +85,8 @@ export function LoginForm() {
                     <Input
                       type="email"
                       placeholder="admin@example.com"
+                      autoComplete="email"
+                      disabled={isLoading}
                       {...field}
                     />
                   </FormControl>
@@ -100,14 +107,17 @@ export function LoginForm() {
                         type={showPassword ? 'text' : 'password'}
                         placeholder="비밀번호를 입력하세요"
                         className="pr-10"
+                        autoComplete="current-password"
+                        disabled={isLoading}
                         {...field}
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-0 top-0 h-full px-3"
+                        className="absolute top-0 right-0 h-full px-3"
                         onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
                       >
                         {showPassword ? (
                           <EyeOffIcon className="h-4 w-4" />
@@ -127,12 +137,6 @@ export function LoginForm() {
             </Button>
           </form>
         </Form>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            테스트 계정: admin@example.com / password123
-          </p>
-        </div>
       </CardContent>
     </Card>
   )

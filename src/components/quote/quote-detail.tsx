@@ -21,8 +21,7 @@ interface QuoteDetailProps {
  */
 export function QuoteDetail({ quote }: QuoteDetailProps) {
   const subtotal = quote.totalAmount
-  const tax = Math.round(subtotal * 0.1)
-  const total = subtotal + tax
+  const total = subtotal
 
   return (
     <div className="space-y-6">
@@ -112,13 +111,6 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
               <span className="font-medium">
                 {CURRENCY.SYMBOL}
                 {subtotal.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">부가세 (10%)</span>
-              <span className="font-medium">
-                {CURRENCY.SYMBOL}
-                {tax.toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between border-t pt-2 text-lg font-bold">

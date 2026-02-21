@@ -1,34 +1,121 @@
-'use client'
-
-import { useState, useMemo } from 'react'
+import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { Container } from '@/components/layout/container'
 import { StatsCards } from '@/components/dashboard/stats-cards'
-import { SearchFilter } from '@/components/dashboard/search-filter'
+import { SearchFilterClient } from '@/components/dashboard/search-filter-client'
 import { QuoteListTable } from '@/components/dashboard/quote-list-table'
-import { getQuoteStats, filterQuotes } from '@/lib/dummy-data'
+import { Skeleton } from '@/components/ui/skeleton'
+import { getQuoteStats, getCachedQuotes } from '@/lib/notion'
 import type { QuoteStatus } from '@/lib/constants'
 
+export const metadata: Metadata = {
+  title: '대시보드',
+}
+
 /**
- * 관리자 대시보드 페이지
+ * 검색 파라미터 타입
+ */
+interface SearchParams {
+  search?: string
+  status?: QuoteStatus | 'all'
+  page?: string
+}
+
+interface PageProps {
+  searchParams: Promise<SearchParams>
+}
+
+/**
+ * 통계 카드 서버 컴포넌트
+ */
+async function StatsSection() {
+  const stats = await getQuoteStats()
+  return <StatsCards stats={stats} />
+}
+
+/**
+ * 통계 카드 로딩 스켈레톤
+ */
+function StatsCardsSkeleton() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="bg-card rounded-lg border p-6">
+          <div className="flex items-center justify-between pb-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-4" />
+          </div>
+          <Skeleton className="h-8 w-12" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * 견적서 목록 서버 컴포넌트
+ */
+async function QuoteListSection({
+  search,
+  status,
+}: {
+  search?: string
+  status?: QuoteStatus
+}) {
+  const quotes = await getCachedQuotes(search, status)
+
+  return <QuoteListTable quotes={quotes} />
+}
+
+/**
+ * 견적서 목록 로딩 스켈레톤
+ */
+function QuoteListSkeleton() {
+  return (
+    <div className="rounded-md border">
+      <div className="p-4">
+        <div className="space-y-3">
+          {/* 테이블 헤더 스켈레톤 */}
+          <div className="grid grid-cols-6 gap-4 border-b pb-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="ml-auto h-4 w-24" />
+          </div>
+          {/* 테이블 행 스켈레톤 */}
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="grid grid-cols-6 gap-4 py-3">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="ml-auto h-4 w-28" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * 관리자 대시보드 페이지 (Server Component)
  *
  * 기능:
- * - 상태별 통계 카드
- * - 견적서 검색 및 필터링
- * - 견적서 목록 테이블
+ * - 상태별 통계 카드 (서버에서 데이터 패칭)
+ * - 견적서 검색 및 필터링 (URL 파라미터 기반)
+ * - 견적서 목록 테이블 (서버에서 필터링)
  * - 견적서 클릭 시 상세 페이지 이동
  */
-export default function AdminDashboardPage() {
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<QuoteStatus | 'all'>('all')
+export default async function AdminDashboardPage({ searchParams }: PageProps) {
+  const params = await searchParams
 
-  const stats = getQuoteStats()
-
-  const filteredQuotes = useMemo(() => {
-    return filterQuotes({
-      search,
-      status: statusFilter === 'all' ? undefined : statusFilter,
-    })
-  }, [search, statusFilter])
+  const search = params.search || undefined
+  const status =
+    params.status && params.status !== 'all' ? params.status : undefined
 
   return (
     <Container className="py-8">
@@ -40,15 +127,19 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        <StatsCards stats={stats} />
+        {/* 통계 카드 - Suspense로 스트리밍 */}
+        <Suspense fallback={<StatsCardsSkeleton />}>
+          <StatsSection />
+        </Suspense>
 
         <div className="space-y-4">
-          <SearchFilter
-            onSearchChange={setSearch}
-            onStatusChange={setStatusFilter}
-          />
+          {/* 검색/필터 - 클라이언트 컴포넌트 */}
+          <SearchFilterClient />
 
-          <QuoteListTable quotes={filteredQuotes} />
+          {/* 견적서 목록 - Suspense로 스트리밍 */}
+          <Suspense fallback={<QuoteListSkeleton />}>
+            <QuoteListSection search={search} status={status} />
+          </Suspense>
         </div>
       </div>
     </Container>

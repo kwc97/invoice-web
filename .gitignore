@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# temp files
+tmpclaude-*
+nul
+*.png
+!public/**/*.png
+.playwright-mcp/
+shrimp_data/

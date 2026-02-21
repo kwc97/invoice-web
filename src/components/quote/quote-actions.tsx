@@ -1,25 +1,27 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Download, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { QuoteStatus } from '@/lib/constants'
 import { QUOTE_STATUS } from '@/lib/constants'
+import { approveQuote, rejectQuote } from '@/app/actions/quote'
 
 interface QuoteActionsProps {
   quoteId: string
   currentStatus: QuoteStatus
+  isExpired?: boolean
 }
 
 /**
  * 견적서 액션 버튼 컴포넌트
  * PDF 다운로드, 승인, 거부 기능
  */
-export function QuoteActions({
-  currentStatus,
-}: Omit<QuoteActionsProps, 'quoteId'>) {
+export function QuoteActions({ quoteId, currentStatus }: QuoteActionsProps) {
+  const router = useRouter()
   const [status, setStatus] = useState(currentStatus)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -29,24 +31,60 @@ export function QuoteActions({
 
   const handlePdfDownload = async () => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    toast.info('PDF 다운로드는 다음 단계에서 구현됩니다')
-    setIsLoading(false)
+    try {
+      const response = await fetch(`/api/pdf/${quoteId}`)
+
+      if (!response.ok) {
+        throw new Error('PDF 생성에 실패했습니다')
+      }
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `견적서.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('PDF 다운로드가 완료되었습니다')
+    } catch {
+      toast.error('PDF 다운로드에 실패했습니다')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleApprove = async () => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    setStatus(QUOTE_STATUS.APPROVED)
-    toast.success('견적서가 승인되었습니다. 담당자가 곧 연락드리겠습니다.')
+
+    const result = await approveQuote(quoteId)
+
+    if (result.success) {
+      setStatus(QUOTE_STATUS.APPROVED)
+      toast.success('견적서가 승인되었습니다. 담당자가 곧 연락드리겠습니다.')
+      router.refresh()
+    } else {
+      toast.error(result.error || '견적서 승인에 실패했습니다')
+    }
+
     setIsLoading(false)
   }
 
   const handleReject = async () => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    setStatus(QUOTE_STATUS.REJECTED)
-    toast.error('견적서가 거부되었습니다.')
+
+    const result = await rejectQuote(quoteId)
+
+    if (result.success) {
+      setStatus(QUOTE_STATUS.REJECTED)
+      toast.error('견적서가 거부되었습니다.')
+      router.refresh()
+    } else {
+      toast.error(result.error || '견적서 거부에 실패했습니다')
+    }
+
     setIsLoading(false)
   }
 
@@ -96,7 +134,11 @@ export function QuoteActions({
 
         {!isCompleted && (
           <>
-            <Button className="flex-1" onClick={handleApprove} disabled={isLoading}>
+            <Button
+              className="flex-1"
+              onClick={handleApprove}
+              disabled={isLoading}
+            >
               <CheckCircle className="mr-2 h-4 w-4" />
               승인
             </Button>

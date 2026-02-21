@@ -15,7 +15,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { dummyLogout } from '@/lib/auth-dummy'
+import { logout } from '@/app/actions/auth'
 
 /**
  * 관리자 전용 헤더 컴포넌트
@@ -24,11 +24,24 @@ import { dummyLogout } from '@/lib/auth-dummy'
 export function Header() {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const handleLogout = () => {
-    dummyLogout()
-    toast.success('로그아웃되었습니다')
-    router.push('/login')
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      const result = await logout()
+      if (result.success) {
+        toast.success('로그아웃되었습니다')
+        router.push('/login')
+        router.refresh() // 세션 상태 갱신
+      } else {
+        toast.error(result.error || '로그아웃에 실패했습니다.')
+      }
+    } catch {
+      toast.error('로그아웃 중 오류가 발생했습니다.')
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
   return (
@@ -54,9 +67,14 @@ export function Header() {
               </Link>
             </nav>
             <ThemeToggle />
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+            >
               <LogOut className="mr-2 h-4 w-4" />
-              로그아웃
+              {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
             </Button>
           </div>
 
@@ -85,9 +103,10 @@ export function Header() {
                     variant="outline"
                     onClick={handleLogout}
                     className="w-full justify-start"
+                    disabled={isLoggingOut}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    로그아웃
+                    {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
                   </Button>
                 </nav>
               </SheetContent>

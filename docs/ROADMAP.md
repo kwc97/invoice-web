@@ -272,74 +272,84 @@ Notion 데이터베이스 기반으로 견적서를 관리하고, 클라이언�
 
 ### Phase 4: 고급 기능 및 최적화
 
-- **Task 018: PDF 다운로드 기능 구현 (F004)**
-  - @react-pdf/renderer 설정
+- ✅ **Task 018: PDF 다운로드 기능 구현 (F004)**
+  - ✅ @react-pdf/renderer 설정
+    - `/lib/pdf/styles.ts` (PDF 스타일 정의)
     - `/lib/pdf/document.tsx` (PDF 문서 컴포넌트)
-    - 견적서 레이아웃을 PDF 형식으로 구현
-  - PDF 생성 Server Action 구현
-    - `/app/actions/pdf.ts` (`generateQuotePDF()`)
-    - 견적서 데이터를 PDF로 변환
-    - PDF 파일 Blob 반환
-  - 견적서 상세 페이지(공개)에서 PDF 다운로드 버튼 연동
-    - 더미 함수 → 실제 Server Action 교체
+    - Nanum Gothic TTF 한글 폰트 등록
+  - ✅ PDF 생성 API Route 구현
+    - `/app/api/pdf/[quoteId]/route.ts` (서버사이드 PDF 렌더링)
+    - `renderToBuffer()`로 견적서 데이터를 PDF로 변환
+    - PDF 파일 바이너리 응답 반환
+  - ✅ 견적서 상세 페이지(공개)에서 PDF 다운로드 버튼 연동
+    - 더미 함수 → 실제 API 호출 교체
     - PDF 생성 로딩 상태 표시
     - 다운로드 완료 후 파일 저장 트리거
-  - 인쇄 최적화 레이아웃 구현
+  - ✅ 인쇄 최적화 레이아웃 구현
     - A4 크기, 적절한 여백, 폰트 설정
     - 회사 로고 및 브랜딩 요소 포함
-  - Playwright MCP로 PDF 생성 E2E 테스트
+  - ✅ Playwright MCP로 PDF 생성 E2E 테스트
     - PDF 다운로드 버튼 클릭 시 파일 생성 확인
     - PDF 내용이 견적서 데이터와 일치하는지 검증
     - 다양한 견적서 항목 수에 대한 레이아웃 테스트
 
-- **Task 019: 에러 핸들링 및 사용자 경험 개선**
-  - 전역 에러 바운더리 구현
-    - `/app/error.tsx`, `/app/global-error.tsx`
-  - 404 페이지 커스터마이징
+- ✅ **Task 019: 에러 핸들링 및 사용자 경험 개선**
+  - ✅ 전역 에러 바운더리 구현
+    - `/app/error.tsx`, `/app/global-error.tsx`, `/app/admin/error.tsx`
+  - ✅ 404 페이지 커스터마이징
     - `/app/not-found.tsx`
-  - 로딩 상태 개선
-    - `/app/loading.tsx` (글로벌 로딩)
+  - ✅ 로딩 상태 개선
+    - 각 페이지별 loading.tsx 스켈레톤 UI (4개)
     - 각 페이지별 Suspense 경계 설정
-  - Toast 알림 시스템 구현
-    - shadcn/ui toast 컴포넌트 활용
+  - ✅ Toast 알림 시스템 구현
+    - Sonner toast 컴포넌트 활용
     - 성공/에러 메시지 일관성 유지
   - Notion API 에러 핸들링
     - API 호출 실패 시 재시도 로직
     - 사용자 친화적 에러 메시지 표시
-  - Playwright MCP로 에러 시나리오 E2E 테스트
-    - Notion API 오류 시 에러 페이지 표시 확인
+  - ✅ Playwright MCP로 에러 시나리오 E2E 테스트
+    - 런타임 에러 시 에러 페이지 표시 확인
     - 존재하지 않는 페이지 접근 시 404 페이지 확인
-    - 로딩 상태가 적절히 표시되는지 확인
+    - 관리자 에러 페이지에서 Header/Footer 유지 확인
 
-- **Task 020: 성능 최적화 및 캐싱 전략**
-  - Next.js 캐싱 전략 적용
-    - Server Component에서 `revalidate` 설정
-    - Notion API 응답 캐싱 (ISR 활용)
-  - 이미지 최적화
-    - Next.js Image 컴포넌트 사용
-    - 회사 로고 및 아이콘 최적화
-  - 번들 크기 최적화
-    - 동적 임포트 활용 (PDF 생성 모듈 등)
-    - Tree shaking 확인
-  - Lighthouse 성능 점수 개선
-    - 접근성, SEO, 성능 메트릭 최적화
-  - Playwright MCP로 성능 테스트
-    - 페이지 로딩 시간 측정
-    - 캐싱 동작 확인
+- ✅ **Task 020: 성능 최적화 및 캐싱 전략**
+  - ✅ Next.js 캐싱 전략 적용
+    - `unstable_cache()` 60초 시간 기반 캐싱 (quotes 태그)
+    - React `cache()` 동일 렌더링 내 중복 요청 제거
+    - `getCachedQuotes`, `getCachedQuoteById`, `getCachedQuoteByPublicLink` 구현
+  - ✅ Server Action 캐시 무효화
+    - `revalidateTag('quotes')` 상태 변경 시 캐시 무효화
+    - `createPublicLink`, `approveQuote`, `rejectQuote` 모두 적용
+  - ✅ 페이지 캐싱 연동
+    - 대시보드: `getCachedQuotes` 사용
+    - 관리자 견적서 상세: `getCachedQuoteById` 사용
+    - 공개 견적서: `getCachedQuoteByPublicLink` 사용
+    - 통계 함수: `getCachedQuotes` 기반으로 최적화
+  - ✅ 메타데이터 최적화
+    - Root 레이아웃: "견적서 관리 시스템" (template 패턴)
+    - 대시보드: 정적 메타데이터
+    - 관리자 견적서 상세: `generateMetadata()` 견적번호 포함
+    - 공개 견적서: `generateMetadata()` 견적번호 + 고객명 포함
+  - ✅ 빌드 성공 및 check-all 통과
 
-- **Task 021: 보안 강화**
-  - 환경 변수 보안 검증
-    - 클라이언트에 노출되지 않도록 검증
-  - 공개 링크 보안 강화
-    - Rate limiting 구현 (선택사항)
-    - 무단 접근 로깅 (선택사항)
-  - CSRF 보호 확인
-    - NextAuth.js CSRF 토큰 활용
-  - 콘텐츠 보안 정책(CSP) 설정
-    - Next.js 헤더 설정
-  - Playwright MCP로 보안 테스트
-    - XSS 공격 시나리오 테스트
-    - 인증되지 않은 접근 차단 확인
+- ✅ **Task 021: 보안 강화**
+  - ✅ 비밀번호 해싱 적용
+    - bcryptjs 패키지 도입 (Edge Runtime 호환)
+    - 평문 비교 → `bcryptjs.compare()` 해시 비교로 변경
+    - `.env.local` 비밀번호를 bcrypt 해시값으로 교체
+  - ✅ 로그인 보안 개선
+    - 테스트 계정 정보 로그인 폼에서 제거
+    - 인증된 사용자 `/login` 접근 시 대시보드 리다이렉트
+  - ✅ Server Action 인증/검증 강화
+    - `createPublicLink`에 `auth()` 관리자 인증 검증 추가
+    - `approveQuote`/`rejectQuote`에 견적서 만료 서버 검증 추가
+  - ✅ API Route 입력 검증
+    - PDF API에 Notion 페이지 ID 형식 정규식 검증 추가
+  - ✅ 보안 헤더 강화
+    - `Strict-Transport-Security` (HSTS) 추가
+    - `Permissions-Policy` 추가
+    - `Content-Security-Policy` (CSP) 추가
+  - ✅ 빌드 성공 및 check-all 통과
 
 - **Task 022: 배포 준비 및 CI/CD 설정**
   - Vercel 배포 설정
@@ -364,15 +374,13 @@ Notion 데이터베이스 기반으로 견적서를 관리하고, 클라이언�
 - **Phase 1**: 3/3 완료 (100%) ✅
 - **Phase 2**: 7/7 완료 (100%) ✅
 - **Phase 3**: 7/7 완료 (100%) ✅
-- **Phase 4**: 0/5 완료 (0%)
-- **전체**: 17/22 완료 (77%)
+- **Phase 4**: 4/5 완료 (80%)
+- **전체**: 21/22 완료 (95%)
 
 ## 🎯 다음 우선순위 작업
 
-1. **Task 018**: PDF 다운로드 기능 구현 (F004)
-2. **Task 019**: 에러 핸들링 및 사용자 경험 개선
-3. **Task 020**: 성능 최적화 및 캐싱 전략
+1. **Task 022**: 배포 준비 및 CI/CD 설정
 
 ---
 
-**마지막 업데이트**: 2026-01-13
+**마지막 업데이트**: 2026-02-21

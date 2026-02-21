@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { nanoid } from 'nanoid'
 import { toast } from 'sonner'
 import { Copy, Link as LinkIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { createPublicLink } from '@/app/actions/quote'
 
 interface PublicLinkSectionProps {
   quoteId: string
@@ -15,11 +15,12 @@ interface PublicLinkSectionProps {
 
 /**
  * 공개 링크 생성 및 관리 컴포넌트
- * nanoid로 고유 링크 ID 생성
+ * Server Action으로 Notion에 저장
  */
 export function PublicLinkSection({
+  quoteId,
   initialPublicLinkId,
-}: Omit<PublicLinkSectionProps, 'quoteId'>) {
+}: PublicLinkSectionProps) {
   const [publicLinkId, setPublicLinkId] = useState(initialPublicLinkId)
   const [isGenerating, setIsGenerating] = useState(false)
 
@@ -29,11 +30,16 @@ export function PublicLinkSection({
 
   const handleGenerateLink = async () => {
     setIsGenerating(true)
-    await new Promise((resolve) => setTimeout(resolve, 500))
 
-    const newLinkId = nanoid(10)
-    setPublicLinkId(newLinkId)
-    toast.success('공개 링크가 생성되었습니다')
+    const result = await createPublicLink(quoteId)
+
+    if (result.success && result.publicLinkId) {
+      setPublicLinkId(result.publicLinkId)
+      toast.success('공개 링크가 생성되었습니다')
+    } else {
+      toast.error(result.error || '링크 생성에 실패했습니다')
+    }
+
     setIsGenerating(false)
   }
 

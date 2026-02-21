@@ -64,6 +64,33 @@ export interface NotionRelation {
   relation: Array<{ id: string }>
 }
 
+/** Notion Email 속성 */
+export interface NotionEmail {
+  id: string
+  type: 'email'
+  email: string | null
+}
+
+/** Notion Phone Number 속성 */
+export interface NotionPhoneNumber {
+  id: string
+  type: 'phone_number'
+  phone_number: string | null
+}
+
+/** Notion Formula 속성 */
+export interface NotionFormula {
+  id: string
+  type: 'formula'
+  formula: {
+    type: 'number' | 'string' | 'boolean' | 'date'
+    number?: number | null
+    string?: string | null
+    boolean?: boolean | null
+    date?: { start: string } | null
+  }
+}
+
 /**
  * Customers 데이터베이스 페이지 타입
  */
@@ -79,10 +106,10 @@ export interface NotionCustomerPage {
     Name: NotionTitle
     /** 회사명 (Rich Text) */
     Company: NotionRichText
-    /** 이메일 (Rich Text) */
-    Email: NotionRichText
-    /** 전화번호 (Rich Text) */
-    Phone: NotionRichText
+    /** 이메일 (Email) */
+    Email: NotionEmail
+    /** 전화번호 (Phone Number) */
+    Phone: NotionPhoneNumber
     /** 주소 (Rich Text) */
     Address: NotionRichText
   }
@@ -105,10 +132,10 @@ export interface NotionQuoteItemPage {
     Description: NotionRichText
     /** 수량 (Number) */
     Quantity: NotionNumber
-    /** 단가 (Rich Text - 통화 문자열) */
-    'Unit Price': NotionRichText
-    /** 금액 (Rich Text - 통화 문자열) */
-    Amount: NotionRichText
+    /** 단가 (Number - 통화 형식) */
+    'Unit Price': NotionNumber
+    /** 금액 (Formula - Unit Price * Quantity) */
+    Amount: NotionFormula
     /** 연결된 견적서 (Relation) */
     Quotes: NotionRelation
   }
@@ -135,8 +162,8 @@ export interface NotionQuotePage {
     'Valid Until': NotionRichText
     /** 상태 (Select) */
     Status: NotionSelect
-    /** 총액 (Number) */
-    'Total Amount': NotionNumber
+    /** 총액 (Number) - Notion DB 속성명에 뒤 공백 포함 */
+    'Total Amount ': NotionNumber
     /** 비고 (Rich Text) */
     Notes: NotionRichText
     /** 공개 링크 ID (Rich Text) */

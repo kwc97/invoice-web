@@ -20,7 +20,10 @@
       "mcp__shrimp-task-manager__reflect_task",
       "mcp__shrimp-task-manager__split_tasks",
       "mcp__shrimp-task-manager__execute_task",
-      "mcp__shrimp-task-manager__verify_task"
+      "mcp__shrimp-task-manager__verify_task",
+      "mcp__shrimp-task-manager__get_task_detail",
+      "mcp__shrimp-task-manager__query_task",
+      "mcp__shrimp-task-manager__clear_all_tasks"
     ],
     "deny": [],
     "ask": []

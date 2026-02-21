@@ -1,28 +1,26 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+/**
+ * NextAuth.js v5 미들웨어
+ * auth 함수를 미들웨어로 내보내기
+ */
+
+export { auth as middleware } from '@/auth'
 
 /**
- * 더미 인증 미들웨어
- * /admin/* 경로 접근 시 쿠키 기반 인증 체크
- * Phase 3에서 NextAuth.js로 교체 예정
+ * 미들웨어가 적용될 경로 설정
+ * - /admin/* : 관리자 페이지 (인증 필요)
+ * - /login : 로그인 페이지 (인증된 사용자 리다이렉트)
+ * - /api/auth/* : NextAuth.js API 라우트 제외
  */
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  // /admin 경로 보호
-  if (pathname.startsWith('/admin')) {
-    const isAuthenticated = request.cookies.get('dummy-auth')?.value === 'true'
-
-    if (!isAuthenticated) {
-      const loginUrl = new URL('/login', request.url)
-      loginUrl.searchParams.set('from', pathname)
-      return NextResponse.redirect(loginUrl)
-    }
-  }
-
-  return NextResponse.next()
-}
-
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    /*
+     * 다음으로 시작하는 경로를 제외한 모든 요청 경로에 매칭:
+     * - api/auth (NextAuth.js 라우트)
+     * - _next/static (정적 파일)
+     * - _next/image (이미지 최적화 파일)
+     * - favicon.ico (파비콘 파일)
+     * - public 폴더 내 파일
+     */
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }

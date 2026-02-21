@@ -5,6 +5,7 @@ import { CURRENCY } from '@/lib/constants'
 
 interface PublicQuoteViewProps {
   quote: Quote
+  isExpired?: boolean
 }
 
 /**
@@ -13,8 +14,7 @@ interface PublicQuoteViewProps {
  */
 export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
   const subtotal = quote.totalAmount
-  const tax = Math.round(subtotal * 0.1)
-  const total = subtotal + tax
+  const total = subtotal
 
   return (
     <Card className="mx-auto max-w-4xl">
@@ -57,6 +57,18 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
                 <p className="text-sm font-medium">회사명</p>
                 <p className="text-muted-foreground">
                   {quote.customer?.company || '-'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">이메일</p>
+                <p className="text-muted-foreground">
+                  {quote.customer?.email || '-'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">전화번호</p>
+                <p className="text-muted-foreground">
+                  {quote.customer?.phone || '-'}
                 </p>
               </div>
             </div>
@@ -122,13 +134,6 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
               <span className="font-medium">
                 {CURRENCY.SYMBOL}
                 {subtotal.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">부가세 (10%)</span>
-              <span className="font-medium">
-                {CURRENCY.SYMBOL}
-                {tax.toLocaleString()}
               </span>
             </div>
             <Separator />
