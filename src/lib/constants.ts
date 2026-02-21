@@ -12,11 +12,12 @@ export const QUOTE_STATUS = {
   CONFIRMED: '확인됨',
   APPROVED: '승인됨',
   REJECTED: '거부됨',
+  EXPIRED: '만료됨',
 } as const
 
 /**
  * 견적서 상태 타입
- * "작성중" | "발송됨" | "확인됨" | "승인됨" | "거부됨"
+ * "작성중" | "발송됨" | "확인됨" | "승인됨" | "거부됨" | "만료됨"
  */
 export type QuoteStatus = (typeof QUOTE_STATUS)[keyof typeof QUOTE_STATUS]
 
@@ -29,6 +30,7 @@ export const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {
   [QUOTE_STATUS.CONFIRMED]: '확인됨',
   [QUOTE_STATUS.APPROVED]: '승인됨',
   [QUOTE_STATUS.REJECTED]: '거부됨',
+  [QUOTE_STATUS.EXPIRED]: '만료됨',
 }
 
 /**
@@ -40,6 +42,7 @@ export const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
   [QUOTE_STATUS.CONFIRMED]: 'yellow',
   [QUOTE_STATUS.APPROVED]: 'green',
   [QUOTE_STATUS.REJECTED]: 'red',
+  [QUOTE_STATUS.EXPIRED]: 'orange',
 }
 
 /**
@@ -77,4 +80,5 @@ export const COMPANY_INFO = {
   businessCategory: '기계설치,기계장치,기계설비',
   tel: '031-704-2989',
   fax: '031-704-2985',
+  email: 'info@kprotek.com',
 } as const

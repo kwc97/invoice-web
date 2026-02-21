@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { QuoteStats } from '@/types/quote'
-import { FileText, Send, Eye, CheckCircle, XCircle } from 'lucide-react'
+import { FileText, Send, Eye, CheckCircle, XCircle, Clock } from 'lucide-react'
 
 interface StatsCardsProps {
   stats: QuoteStats
@@ -42,11 +42,17 @@ export function StatsCards({ stats }: StatsCardsProps) {
       icon: XCircle,
       color: 'text-red-600',
     },
+    {
+      title: '만료됨',
+      value: stats.expired,
+      icon: Clock,
+      color: 'text-orange-600',
+    },
   ]
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-      {cards.map((card) => (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+      {cards.map(card => (
         <Card key={card.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{card.title}</CardTitle>

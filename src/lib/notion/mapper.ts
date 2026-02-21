@@ -9,6 +9,7 @@ import type {
 } from '@/types/notion'
 import type { Quote, QuoteItem, Customer } from '@/types/quote'
 import type { QuoteStatus } from '@/lib/constants'
+import type { SupportedLanguage } from '@/lib/i18n/types'
 
 /**
  * Notion Rich Text 추출
@@ -48,6 +49,18 @@ function formatDateToKorean(isoDate: string): string {
   if (!isoDate) return ''
   const [year, month, day] = isoDate.split('-')
   return `${year}년 ${month}월 ${day}일`
+}
+
+/**
+ * 한글 날짜를 ISO 형식으로 변환
+ * "2026년 01월 11일" → "2026-01-11"
+ */
+export function koreanDateToISO(koreanDate: string): string {
+  if (!koreanDate) return ''
+  const match = koreanDate.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/)
+  if (!match) return ''
+  const [, year, month, day] = match
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
 }
 
 /**
@@ -129,6 +142,11 @@ export function mapNotionQuoteToQuote(
     page.properties['Contact Person']?.rich_text
   )
 
+  // Language Select에서 값 추출 (null이면 'ko' 기본값)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const languageProp = page.properties.Language as any
+  const language = (languageProp?.select?.name ?? 'ko') as SupportedLanguage
+
   // Total Amount는 'Total Amount ' (공백 포함!) + Rollup 타입
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const totalAmountProp = page.properties['Total Amount '] as any
@@ -149,6 +167,7 @@ export function mapNotionQuoteToQuote(
     ...(projectName && { projectName }),
     ...(recipient && { recipient }),
     ...(contactPerson && { contactPerson }),
+    language,
     createdTime: page.created_time,
     lastEditedTime: page.last_edited_time,
   }

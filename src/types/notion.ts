@@ -180,6 +180,8 @@ export interface NotionQuotePage {
     Recipient?: NotionRichText
     /** 견적 담당자 (Rich Text, 선택) */
     'Contact Person'?: NotionRichText
+    /** 견적서 언어 (Select, 선택) */
+    Language?: NotionSelect
   }
 }
 

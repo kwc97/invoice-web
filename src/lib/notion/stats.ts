@@ -15,6 +15,7 @@ export interface QuoteStats {
   confirmed: number
   approved: number
   rejected: number
+  expired: number
   totalAmount: number
 }
 
@@ -39,6 +40,7 @@ export async function getQuoteStats(): Promise<QuoteStats> {
       .length,
     approved: approvedQuotes.length,
     rejected: allQuotes.filter(q => q.status === QUOTE_STATUS.REJECTED).length,
+    expired: allQuotes.filter(q => q.status === QUOTE_STATUS.EXPIRED).length,
     totalAmount,
   }
 }

@@ -4,6 +4,7 @@
  */
 
 import type { QuoteStatus } from '@/lib/constants'
+import type { SupportedLanguage } from '@/lib/i18n/types'
 
 /**
  * 고객 (Customer) 타입
@@ -75,6 +76,8 @@ export interface Quote {
   recipient?: string
   /** 견적 담당자 (선택) */
   contactPerson?: string
+  /** 견적서 언어 (기본값: 'ko') */
+  language: SupportedLanguage
 
   // 조인된 데이터 (선택적)
   /** 고객 정보 (조인 시에만 포함) */
@@ -105,6 +108,8 @@ export interface QuoteStats {
   approved: number
   /** 거부됨 견적서 수 */
   rejected: number
+  /** 만료됨 견적서 수 */
+  expired: number
   /** 총 견적 금액 (승인됨 기준) */
   totalAmount: number
 }
