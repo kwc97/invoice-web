@@ -1,27 +1,31 @@
 import Image from 'next/image'
 import type { Quote } from '@/types/quote'
+import type { Dictionary } from '@/lib/i18n/types'
 import { CURRENCY, COMPANY_INFO } from '@/lib/constants'
 import { numberToKoreanCurrency } from '@/lib/utils'
 
 interface PublicQuoteViewProps {
   quote: Quote
-  isExpired?: boolean
+  dictionary: Dictionary
 }
 
 /**
  * 공개 견적서 뷰 컴포넌트
- * 회사 공식 견적서 양식 레이아웃
+ * 회사 공식 견적서 양식 레이아웃 (다국어 지원)
  */
-export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
+export function PublicQuoteView({
+  quote,
+  dictionary: dict,
+}: PublicQuoteViewProps) {
   const total = quote.totalAmount
-  const koreanAmount = numberToKoreanCurrency(total)
+  const showKoreanAmount = dict.koreanAmount.prefix !== null
 
   return (
-    <div className="mx-auto max-w-4xl bg-white text-black print:shadow-none">
-      <div className="p-8">
+    <div className="mx-auto max-w-4xl bg-white text-black print:max-w-none print:shadow-none">
+      <div className="p-8 print:p-6">
         {/* 견적서 제목 */}
         <h1 className="mb-6 text-center text-3xl font-bold tracking-[0.5em]">
-          견 적 서
+          {dict.quote.title}
         </h1>
 
         {/* 상단: 좌측 견적정보 + 우측 공급자 정보 */}
@@ -38,25 +42,36 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
                 priority
               />
             </div>
-            <InfoRow label="NO." value={quote.quoteNumber} />
-            <InfoRow label="견적일자" value={quote.issueDate} />
+            <InfoRow label={dict.quote.no} value={quote.quoteNumber} />
+            <InfoRow label={dict.quote.issueDate} value={quote.issueDate} />
             {quote.projectName && (
-              <InfoRow label="Project명" value={quote.projectName} />
+              <InfoRow
+                label={dict.quote.projectName}
+                value={quote.projectName}
+              />
             )}
             <InfoRow
-              label="수 신"
+              label={dict.quote.recipient}
               value={quote.recipient || quote.customer?.name || '-'}
             />
             <div className="mt-3 space-y-1">
               <p className="text-sm">
-                <span className="font-medium">견적 금액: </span>
-                <span>(일금 {koreanAmount}원)</span>
+                <span className="font-medium">{dict.quote.quoteAmount}: </span>
+                {showKoreanAmount && (
+                  <span>
+                    ({dict.koreanAmount.prefix}
+                    {numberToKoreanCurrency(total)}
+                    {dict.koreanAmount.suffix})
+                  </span>
+                )}
               </p>
               <p className="text-lg font-bold">
                 {'     '}
                 {CURRENCY.SYMBOL}
                 {total.toLocaleString()}{' '}
-                <span className="text-sm font-normal">&lt;부가세별도&gt;</span>
+                <span className="text-sm font-normal">
+                  &lt;{dict.quote.vatExcluded}&gt;
+                </span>
               </p>
             </div>
           </div>
@@ -82,10 +97,10 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
                       letterSpacing: '0.3em',
                     }}
                   >
-                    공급자
+                    {dict.supplier.label}
                   </td>
                   <td className="w-24 border border-black p-1 text-center text-xs font-medium">
-                    사업자번호
+                    {dict.supplier.businessNumber}
                   </td>
                   <td className="border border-black p-1 text-xs">
                     {COMPANY_INFO.businessNumber}
@@ -93,32 +108,34 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
                 </tr>
                 <tr>
                   <td className="w-24 border border-black p-1 text-center text-xs font-medium">
-                    상호
+                    {dict.supplier.companyName}
                   </td>
                   <td className="border border-black p-1 text-xs">
-                    {COMPANY_INFO.name} 대표: {COMPANY_INFO.representative}
+                    {dict.supplier.values.companyName}{' '}
+                    {dict.supplier.representativeLabel}:{' '}
+                    {dict.supplier.values.representative}
                   </td>
                 </tr>
                 <tr>
                   <td className="w-24 border border-black p-1 text-center text-xs font-medium">
-                    소재지
+                    {dict.supplier.address}
                   </td>
                   <td className="border border-black p-1 text-xs">
-                    {COMPANY_INFO.address}
+                    {dict.supplier.values.address}
                   </td>
                 </tr>
                 <tr>
                   <td className="w-24 border border-black p-1 text-center text-xs font-medium">
-                    업태/종목
+                    {dict.supplier.businessType}
                   </td>
                   <td className="border border-black p-1 text-xs">
-                    {COMPANY_INFO.businessType} /{' '}
-                    {COMPANY_INFO.businessCategory}
+                    {dict.supplier.values.businessType} /{' '}
+                    {dict.supplier.values.businessCategory}
                   </td>
                 </tr>
                 <tr>
                   <td className="w-24 border border-black p-1 text-center text-xs font-medium">
-                    TEL / FAX
+                    {dict.supplier.telFax}
                   </td>
                   <td className="border border-black p-1 text-xs">
                     {COMPANY_INFO.tel} / {COMPANY_INFO.fax}
@@ -132,7 +149,7 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
         {/* 견적 담당자 바 */}
         {quote.contactPerson && (
           <div className="mb-4 border border-black bg-gray-50 px-4 py-2 text-sm">
-            <span className="font-medium">견적담당자: </span>
+            <span className="font-medium">{dict.quote.contactPerson}: </span>
             {quote.contactPerson}
           </div>
         )}
@@ -143,25 +160,25 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
             <thead>
               <tr className="bg-gray-100">
                 <th className="w-[7%] border border-black px-2 py-2 text-center">
-                  Part No
+                  {dict.table.partNo}
                 </th>
                 <th className="w-[28%] border border-black px-2 py-2 text-center">
-                  Description
+                  {dict.table.description}
                 </th>
                 <th className="w-[8%] border border-black px-2 py-2 text-center">
-                  Unit
+                  {dict.table.unit}
                 </th>
                 <th className="w-[8%] border border-black px-2 py-2 text-center">
-                  Q&apos;ty
+                  {dict.table.qty}
                 </th>
                 <th className="w-[17%] border border-black px-2 py-2 text-center">
-                  Unit Price
+                  {dict.table.unitPrice}
                 </th>
                 <th className="w-[17%] border border-black px-2 py-2 text-center">
-                  Total Price
+                  {dict.table.totalPrice}
                 </th>
                 <th className="w-[15%] border border-black px-2 py-2 text-center">
-                  Remarks
+                  {dict.table.remarks}
                 </th>
               </tr>
             </thead>
@@ -200,7 +217,7 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
               <tr className="bg-gray-50 font-bold">
                 <td className="border border-black px-2 py-2 text-center" />
                 <td className="border border-black px-2 py-2 text-center">
-                  Total
+                  {dict.quote.total}
                 </td>
                 <td className="border border-black px-2 py-2" />
                 <td className="border border-black px-2 py-2" />
@@ -210,7 +227,7 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
                   {total.toLocaleString()}
                 </td>
                 <td className="border border-black px-2 py-2 text-center text-xs font-normal">
-                  부가세별도
+                  {dict.quote.vatExcluded}
                 </td>
               </tr>
             </tbody>
@@ -220,7 +237,7 @@ export function PublicQuoteView({ quote }: PublicQuoteViewProps) {
         {/* 견적 조건 */}
         {quote.notes && (
           <div className="border border-black p-4 text-sm">
-            <p className="mb-2 font-bold">* 견적 조건</p>
+            <p className="mb-2 font-bold">{dict.quote.termsAndConditions}</p>
             <div className="space-y-1">
               {quote.notes.split('\n').map((line, i) => (
                 <p key={i}>{line}</p>

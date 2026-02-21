@@ -121,3 +121,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 인쇄 시 견적서만 깔끔하게 출력 */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Sonner 토스트 알림 숨기기 */
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+}

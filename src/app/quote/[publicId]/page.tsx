@@ -1,8 +1,15 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { after } from 'next/server'
+import { auth } from '@/auth'
 import { PublicQuoteView } from '@/components/quote/public-quote-view'
 import { QuoteActions } from '@/components/quote/quote-actions'
+import { AlertTriangle, Mail } from 'lucide-react'
 import { getCachedQuoteByPublicLink } from '@/lib/notion'
+import { confirmQuoteView } from '@/app/actions/quote'
+import { getDictionary, translateQuoteContent } from '@/lib/i18n'
+import { formatDateByLanguage } from '@/lib/i18n/format'
+import { COMPANY_INFO, QUOTE_STATUS } from '@/lib/constants'
 
 interface PageProps {
   params: Promise<{ publicId: string }>
@@ -13,11 +20,18 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { publicId } = await params
   const quote = await getCachedQuoteByPublicLink(publicId)
+  if (!quote) {
+    return { title: '견적서', description: '견적서를 확인하세요.' }
+  }
+
+  const lang = quote.language ?? 'ko'
+  const dict = getDictionary(lang)
   return {
-    title: quote ? `견적서 - ${quote.quoteNumber}` : '견적서',
-    description: quote
-      ? `${quote.customer?.name}님께 보내는 견적서입니다.`
-      : '견적서를 확인하세요.',
+    title: `${dict.quote.title} - ${quote.quoteNumber}`,
+    description:
+      lang === 'ko'
+        ? `${quote.customer?.name}님께 보내는 견적서입니다.`
+        : `Quotation ${quote.quoteNumber} for ${quote.customer?.name}`,
   }
 }
 
@@ -35,18 +49,74 @@ export default async function PublicQuotePage({ params }: PageProps) {
     notFound()
   }
 
-  // 유효기간 확인
-  const isExpired = new Date(quote.validUntil) < new Date()
+  // 외부 고객 열람 시 "발송됨" → "확인됨" 자동 전환
+  const session = await auth()
+  const isAdmin = !!session?.user
+
+  if (!isAdmin && quote.status === QUOTE_STATUS.SENT) {
+    after(() => confirmQuoteView(quote.id))
+  }
+
+  const lang = quote.language ?? 'ko'
+  const dict = getDictionary(lang)
+
+  // 동적 콘텐츠 번역 (한국어가 아닐 때만)
+  const translatedQuote =
+    lang !== 'ko' ? await translateQuoteContent(quote, lang) : quote
+
+  // 날짜 포맷 변환
+  const formattedQuote = {
+    ...translatedQuote,
+    issueDate: formatDateByLanguage(translatedQuote.issueDate, lang),
+    validUntil: formatDateByLanguage(translatedQuote.validUntil, lang),
+  }
+
+  // DB 상태 기반 만료 확인
+  const isExpired = quote.status === QUOTE_STATUS.EXPIRED
+
+  // 만료된 견적서: 전용 안내 화면
+  if (isExpired) {
+    return (
+      <div className="bg-muted/30 flex min-h-screen items-center justify-center px-4 py-12">
+        <div className="mx-auto max-w-lg text-center">
+          <div className="bg-background rounded-lg border p-8 shadow-lg">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900">
+              <AlertTriangle className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+            </div>
+            <h1 className="mb-3 text-2xl font-bold">
+              {dict.messages.expiredTitle}
+            </h1>
+            <p className="text-muted-foreground mb-2 text-sm">
+              {dict.quote.no} {quote.quoteNumber} &middot;{' '}
+              {dict.quote.issueDate} {formattedQuote.issueDate}
+            </p>
+            <p className="text-muted-foreground mb-6">
+              {dict.messages.expiredDescription}
+            </p>
+            <a
+              href={`mailto:${COMPANY_INFO.email ?? ''}?subject=${encodeURIComponent(dict.messages.expiredContact + ' - ' + quote.quoteNumber)}`}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-medium transition-colors"
+            >
+              <Mail className="h-4 w-4" />
+              {dict.messages.expiredContact}
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="bg-muted/30 min-h-screen px-4 py-12">
-      <div className="space-y-6">
-        <PublicQuoteView quote={quote} isExpired={isExpired} />
-        <QuoteActions
-          quoteId={quote.id}
-          currentStatus={quote.status}
-          isExpired={isExpired}
-        />
+    <div className="bg-muted/30 min-h-screen px-4 py-12 print:bg-white print:p-0">
+      <div className="space-y-6 print:space-y-0">
+        <PublicQuoteView quote={formattedQuote} dictionary={dict} />
+        <div className="print:hidden">
+          <QuoteActions
+            quoteId={quote.id}
+            currentStatus={quote.status}
+            dictionary={dict}
+          />
+        </div>
       </div>
     </div>
   )
