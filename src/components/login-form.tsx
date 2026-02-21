@@ -74,7 +74,15 @@ export function LoginForm() {
             alt="케이프로텍"
             width={220}
             height={48}
-            className="h-12 w-auto"
+            className="block h-12 w-auto dark:hidden"
+            priority
+          />
+          <Image
+            src="/logo-dark.png"
+            alt="케이프로텍"
+            width={220}
+            height={48}
+            className="hidden h-12 w-auto dark:block"
             priority
           />
         </div>

@@ -46,7 +46,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
       <Container>
         <div className="flex h-16 items-center justify-between">
           {/* 로고 */}
@@ -56,7 +56,15 @@ export function Header() {
               alt="케이프로텍"
               width={180}
               height={40}
-              className="h-10 w-auto"
+              className="block h-10 w-auto dark:hidden"
+              priority
+            />
+            <Image
+              src="/logo-dark.png"
+              alt="케이프로텍"
+              width={180}
+              height={40}
+              className="hidden h-10 w-auto dark:block"
               priority
             />
             <span className="text-xl font-bold">견적서 관리</span>
@@ -67,7 +75,7 @@ export function Header() {
             <nav className="flex items-center gap-6">
               <Link
                 href="/admin/dashboard"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
               >
                 대시보드
               </Link>
@@ -100,7 +108,7 @@ export function Header() {
                 <nav className="mt-6 flex flex-col gap-4">
                   <Link
                     href="/admin/dashboard"
-                    className="text-lg font-medium text-foreground"
+                    className="text-foreground text-lg font-medium"
                     onClick={() => setIsOpen(false)}
                   >
                     대시보드

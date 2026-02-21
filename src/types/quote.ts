@@ -134,7 +134,13 @@ export interface QuoteFilter {
  */
 export interface QuoteSort {
   /** 정렬 기준 필드 */
-  field: 'issueDate' | 'validUntil' | 'totalAmount' | 'status' | 'quoteNumber'
+  field:
+    | 'issueDate'
+    | 'validUntil'
+    | 'totalAmount'
+    | 'status'
+    | 'quoteNumber'
+    | 'customer'
   /** 정렬 방향 */
   direction: 'asc' | 'desc'
 }
