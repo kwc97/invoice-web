@@ -26,6 +26,8 @@ interface QuoteActionsProps {
   quoteId: string
   currentStatus: QuoteStatus
   dictionary: Dictionary
+  /** 관리자 여부 — 관리자는 승인/거부 불가 (고객만 가능) */
+  isAdmin?: boolean
 }
 
 /**
@@ -36,6 +38,7 @@ export function QuoteActions({
   quoteId,
   currentStatus,
   dictionary: dict,
+  isAdmin = false,
 }: QuoteActionsProps) {
   const router = useRouter()
   const [status, setStatus] = useState(currentStatus)
@@ -123,7 +126,7 @@ export function QuoteActions({
           {dict.actions.downloadPdf}
         </Button>
 
-        {!isCompleted && (
+        {!isCompleted && !isAdmin && (
           <>
             {/* 승인 확인 다이얼로그 */}
             <AlertDialog>

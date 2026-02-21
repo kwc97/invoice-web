@@ -115,6 +115,7 @@ export default async function PublicQuotePage({ params }: PageProps) {
             quoteId={quote.id}
             currentStatus={quote.status}
             dictionary={dict}
+            isAdmin={isAdmin}
           />
         </div>
       </div>
