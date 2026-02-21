@@ -162,24 +162,26 @@ export default function Home() {
           <div className="relative grid gap-6 sm:grid-cols-3">
             {/* 단계 연결선 (데스크톱) */}
             <div
-              className="absolute left-1/3 right-1/3 top-10 hidden h-px bg-gradient-to-r from-border via-primary/30 to-border sm:block"
+              className="absolute left-1/3 right-1/3 top-9 hidden h-px bg-gradient-to-r from-border via-primary/30 to-border sm:block"
               aria-hidden="true"
             />
 
             {WORKFLOW_STEPS.map(({ step, icon: Icon, title, description }) => (
               <Card
                 key={step}
-                className="relative flex flex-col items-center text-center transition-shadow hover:shadow-md"
+                className="relative transition-shadow hover:shadow-md"
               >
-                <CardHeader className="pb-0">
-                  {/* 단계 번호 배지 */}
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary ring-2 ring-primary/20">
-                    <Icon className="h-5 w-5" />
-                  </div>
+                <CardHeader className="pb-2">
                   <span className="absolute right-4 top-4 text-xs font-bold tabular-nums text-muted-foreground/50">
                     {step}
                   </span>
-                  <CardTitle className="text-base">{title}</CardTitle>
+                  {/* 아이콘 + 제목 한 줄 */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-2 ring-primary/20">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-base">{title}</CardTitle>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-sm leading-relaxed">
