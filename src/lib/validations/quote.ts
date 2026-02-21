@@ -5,6 +5,7 @@
 
 import { z } from 'zod'
 import { QUOTE_STATUS } from '@/lib/constants'
+import { SUPPORTED_LANGUAGES } from '@/lib/i18n/types'
 
 /**
  * 견적서 상태 업데이트 검증 스키마
@@ -55,6 +56,7 @@ export const quoteFilterSchema = z.object({
       z.literal(QUOTE_STATUS.CONFIRMED),
       z.literal(QUOTE_STATUS.APPROVED),
       z.literal(QUOTE_STATUS.REJECTED),
+      z.literal(QUOTE_STATUS.EXPIRED),
     ])
     .optional(),
 
@@ -80,38 +82,70 @@ export const quoteFilterSchema = z.object({
 export type QuoteFilterData = z.infer<typeof quoteFilterSchema>
 
 /**
- * 견적서 생성 검증 스키마 (MVP 이후)
+ * 견적 항목 스키마
  */
-export const createQuoteSchema = z.object({
-  /** 견적서 번호 */
-  quoteNumber: z
-    .string({ message: '견적서 번호가 필요합니다' })
-    .min(1, '견적서 번호가 필요합니다')
-    .regex(
-      /^Q-\d{4}-\d{3}$/,
-      '견적서 번호 형식이 올바르지 않습니다 (예: Q-2026-001)'
-    ),
-
-  /** 고객 ID */
-  customerId: z
-    .string({ message: '고객 ID가 필요합니다' })
-    .min(1, '고객 ID가 필요합니다'),
-
-  /** 발행일 (ISO 형식) */
-  issueDate: z
-    .string({ message: '발행일이 필요합니다' })
-    .min(1, '발행일이 필요합니다'),
-
-  /** 유효기간 (ISO 형식) */
-  validUntil: z
-    .string({ message: '유효기간이 필요합니다' })
-    .min(1, '유효기간이 필요합니다'),
-
-  /** 비고 (선택) */
-  notes: z.string().max(1000, '비고는 1000자를 초과할 수 없습니다').optional(),
+export const quoteItemSchema = z.object({
+  /** 기존 항목 ID (수정 시) */
+  id: z.string().optional(),
+  /** 품목명 */
+  name: z.string().min(1, '품목명을 입력하세요'),
+  /** 설명 */
+  description: z.string(),
+  /** 수량 */
+  quantity: z.number().min(1, '1 이상 입력하세요'),
+  /** 단가 */
+  unitPrice: z.number().min(0, '0 이상 입력하세요'),
+  /** 단위 */
+  unit: z.string(),
+  /** 비고 */
+  remarks: z.string(),
 })
 
 /**
- * 견적서 생성 데이터 타입 (Zod 스키마에서 추론)
+ * 견적서 폼 스키마 (생성/수정 공통)
  */
-export type CreateQuoteData = z.infer<typeof createQuoteSchema>
+export const quoteFormSchema = z.object({
+  /** 고객 ID */
+  customerId: z.string().min(1, '고객을 선택하세요'),
+  /** 발행일 (YYYY-MM-DD) */
+  issueDate: z.string().min(1, '발행일을 입력하세요'),
+  /** 유효기간 (YYYY-MM-DD) */
+  validUntil: z.string().min(1, '유효기간을 입력하세요'),
+  /** 프로젝트명 */
+  projectName: z.string(),
+  /** 수신처 */
+  recipient: z.string(),
+  /** 견적 담당자 */
+  contactPerson: z.string(),
+  /** 비고 */
+  notes: z.string(),
+  /** 견적서 언어 */
+  language: z.enum(SUPPORTED_LANGUAGES),
+  /** 견적 항목 목록 */
+  items: z.array(quoteItemSchema).min(1, '최소 1개 항목을 추가하세요'),
+})
+
+/** 견적서 폼 데이터 타입 */
+export type QuoteFormData = z.infer<typeof quoteFormSchema>
+
+/**
+ * 새 고객 등록 검증 스키마
+ */
+export const createCustomerSchema = z.object({
+  /** 고객명 (필수) */
+  name: z.string().min(1, '고객명을 입력하세요'),
+  /** 회사명 */
+  company: z.string(),
+  /** 이메일 */
+  email: z.string().email('올바른 이메일 형식을 입력하세요').or(z.literal('')),
+  /** 전화번호 */
+  phone: z.string(),
+  /** 주소 */
+  address: z.string(),
+})
+
+/** 새 고객 등록 데이터 타입 */
+export type CreateCustomerData = z.infer<typeof createCustomerSchema>
+
+/** 견적 항목 폼 데이터 타입 */
+export type QuoteItemFormData = z.infer<typeof quoteItemSchema>

@@ -9,10 +9,41 @@ import { nanoid } from 'nanoid'
 import { auth } from '@/auth'
 import {
   getQuoteById,
+  getQuoteItemsByQuoteId,
   updateQuotePublicLink,
   updateQuoteStatus,
+  expireOverdueQuotesInDb,
+  generateQuoteNumber,
+  createQuote,
+  createQuoteItem,
+  updateQuote,
+  updateQuoteItem,
+  archiveQuote,
+  archiveQuoteItem,
+  createCustomer,
 } from '@/lib/notion/quotes'
 import { QUOTE_STATUS } from '@/lib/constants'
+import { quoteFormSchema, createCustomerSchema } from '@/lib/validations/quote'
+
+/**
+ * 공개 견적서 열람 확인 (외부 고객 접근 시 자동 호출)
+ * "발송됨" 상태일 때만 "확인됨"으로 전환
+ */
+export async function confirmQuoteView(quoteId: string): Promise<void> {
+  try {
+    const quote = await getQuoteById(quoteId)
+    if (!quote || quote.status !== QUOTE_STATUS.SENT) return
+
+    await updateQuoteStatus(quoteId, QUOTE_STATUS.CONFIRMED)
+
+    revalidateTag('quotes')
+    revalidatePath('/admin/dashboard')
+    revalidatePath(`/admin/quote/${quoteId}`)
+    revalidatePath(`/quote/[publicId]`, 'page')
+  } catch (error) {
+    console.error('[confirmQuoteView] 상태 업데이트 실패:', error)
+  }
+}
 
 /**
  * 공개 링크 생성
@@ -28,10 +59,14 @@ export async function createPublicLink(quoteId: string) {
     const publicLinkId = nanoid(12)
     await updateQuotePublicLink(quoteId, publicLinkId)
 
+    // 링크 생성 = 발송으로 간주하여 상태 변경
+    await updateQuoteStatus(quoteId, QUOTE_STATUS.SENT)
+
     const publicUrl = `${process.env.APP_URL}/quote/${publicLinkId}`
 
     // 캐시 무효화
     revalidateTag('quotes')
+    revalidatePath('/admin/dashboard')
     revalidatePath(`/admin/quote/${quoteId}`)
 
     return {
@@ -49,6 +84,19 @@ export async function createPublicLink(quoteId: string) {
 }
 
 /**
+ * 유효기간이 지난 견적서를 만료 상태로 일괄 업데이트 (Server Action)
+ * 클라이언트에서 호출 시 캐시 무효화 포함
+ */
+export async function expireOverdueQuotes(): Promise<number> {
+  const count = await expireOverdueQuotesInDb()
+  if (count > 0) {
+    revalidateTag('quotes')
+    revalidatePath('/admin/dashboard')
+  }
+  return count
+}
+
+/**
  * 견적서 승인
  */
 export async function approveQuote(quoteId: string) {
@@ -58,7 +106,7 @@ export async function approveQuote(quoteId: string) {
     if (!quote) {
       return { success: false, error: '견적서를 찾을 수 없습니다' }
     }
-    if (new Date(quote.validUntil) < new Date()) {
+    if (quote.status === QUOTE_STATUS.EXPIRED) {
       return { success: false, error: '유효기간이 만료된 견적서입니다' }
     }
 
@@ -93,7 +141,7 @@ export async function rejectQuote(quoteId: string) {
     if (!quote) {
       return { success: false, error: '견적서를 찾을 수 없습니다' }
     }
-    if (new Date(quote.validUntil) < new Date()) {
+    if (quote.status === QUOTE_STATUS.EXPIRED) {
       return { success: false, error: '유효기간이 만료된 견적서입니다' }
     }
 
@@ -115,5 +163,245 @@ export async function rejectQuote(quoteId: string) {
       success: false,
       error: '견적서 거부에 실패했습니다',
     }
+  }
+}
+
+/** 수정/삭제 가능한 상태 */
+const EDITABLE_STATUSES = [QUOTE_STATUS.DRAFT, QUOTE_STATUS.REJECTED] as const
+
+/** 캐시 무효화 헬퍼 */
+function invalidateQuoteCaches(quoteId?: string) {
+  revalidateTag('quotes')
+  revalidatePath('/admin/dashboard')
+  if (quoteId) {
+    revalidatePath(`/admin/quote/${quoteId}`)
+  }
+}
+
+/**
+ * 견적서 생성
+ */
+export async function createQuoteAction(formData: unknown) {
+  const session = await auth()
+  if (!session?.user) {
+    return { success: false, error: '인증이 필요합니다' }
+  }
+
+  const parsed = quoteFormSchema.safeParse(formData)
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message || '입력값이 올바르지 않습니다',
+    }
+  }
+
+  const data = parsed.data
+
+  try {
+    // 견적서 번호 자동 생성
+    const quoteNumber = await generateQuoteNumber()
+
+    // 견적서 생성
+    const quoteId = await createQuote({
+      quoteNumber,
+      customerId: data.customerId,
+      issueDate: data.issueDate,
+      validUntil: data.validUntil,
+      projectName: data.projectName || undefined,
+      recipient: data.recipient || undefined,
+      contactPerson: data.contactPerson || undefined,
+      notes: data.notes || undefined,
+      language: data.language || undefined,
+    })
+
+    // 견적 항목들 병렬 생성
+    await Promise.all(
+      data.items.map(item =>
+        createQuoteItem({
+          name: item.name,
+          description: item.description || undefined,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          unit: item.unit || undefined,
+          remarks: item.remarks || undefined,
+          quoteId,
+        })
+      )
+    )
+
+    invalidateQuoteCaches(quoteId)
+
+    return { success: true, quoteId }
+  } catch (error) {
+    console.error('Failed to create quote:', error)
+    return { success: false, error: '견적서 생성에 실패했습니다' }
+  }
+}
+
+/**
+ * 견적서 수정
+ */
+export async function updateQuoteAction(quoteId: string, formData: unknown) {
+  const session = await auth()
+  if (!session?.user) {
+    return { success: false, error: '인증이 필요합니다' }
+  }
+
+  // 상태 검증
+  const quote = await getQuoteById(quoteId)
+  if (!quote) {
+    return { success: false, error: '견적서를 찾을 수 없습니다' }
+  }
+  if (
+    !EDITABLE_STATUSES.includes(
+      quote.status as (typeof EDITABLE_STATUSES)[number]
+    )
+  ) {
+    return { success: false, error: '수정할 수 없는 상태입니다' }
+  }
+
+  const parsed = quoteFormSchema.safeParse(formData)
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message || '입력값이 올바르지 않습니다',
+    }
+  }
+
+  const data = parsed.data
+
+  try {
+    // 거부됨 → 작성중으로 리셋
+    const newStatus =
+      quote.status === QUOTE_STATUS.REJECTED ? QUOTE_STATUS.DRAFT : undefined
+
+    // 견적서 업데이트
+    await updateQuote(quoteId, {
+      customerId: data.customerId,
+      issueDate: data.issueDate,
+      validUntil: data.validUntil,
+      projectName: data.projectName,
+      recipient: data.recipient,
+      contactPerson: data.contactPerson,
+      notes: data.notes,
+      language: data.language || undefined,
+      status: newStatus,
+    })
+
+    // 기존 항목 조회
+    const existingItems = await getQuoteItemsByQuoteId(quoteId)
+    const existingItemIds = new Set(existingItems.map(item => item.id))
+    const formItemIds = new Set(
+      data.items.filter(item => item.id).map(item => item.id!)
+    )
+
+    // 삭제된 항목 아카이브
+    const deletedIds = [...existingItemIds].filter(id => !formItemIds.has(id))
+    await Promise.all(deletedIds.map(id => archiveQuoteItem(id)))
+
+    // 기존 항목 수정 / 새 항목 생성
+    await Promise.all(
+      data.items.map(item => {
+        if (item.id && existingItemIds.has(item.id)) {
+          // 기존 항목 수정
+          return updateQuoteItem(item.id, {
+            name: item.name,
+            description: item.description,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            unit: item.unit,
+            remarks: item.remarks,
+          })
+        } else {
+          // 새 항목 생성
+          return createQuoteItem({
+            name: item.name,
+            description: item.description || undefined,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            unit: item.unit || undefined,
+            remarks: item.remarks || undefined,
+            quoteId,
+          })
+        }
+      })
+    )
+
+    invalidateQuoteCaches(quoteId)
+
+    return { success: true, quoteId }
+  } catch (error) {
+    console.error('Failed to update quote:', error)
+    return { success: false, error: '견적서 수정에 실패했습니다' }
+  }
+}
+
+/**
+ * 견적서 삭제 (아카이브)
+ */
+export async function deleteQuoteAction(quoteId: string) {
+  const session = await auth()
+  if (!session?.user) {
+    return { success: false, error: '인증이 필요합니다' }
+  }
+
+  // 상태 검증
+  const quote = await getQuoteById(quoteId)
+  if (!quote) {
+    return { success: false, error: '견적서를 찾을 수 없습니다' }
+  }
+  if (
+    !EDITABLE_STATUSES.includes(
+      quote.status as (typeof EDITABLE_STATUSES)[number]
+    )
+  ) {
+    return { success: false, error: '삭제할 수 없는 상태입니다' }
+  }
+
+  try {
+    await archiveQuote(quoteId)
+    invalidateQuoteCaches()
+
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to delete quote:', error)
+    return { success: false, error: '견적서 삭제에 실패했습니다' }
+  }
+}
+
+/**
+ * 새 고객 등록
+ */
+export async function createCustomerAction(formData: unknown) {
+  const session = await auth()
+  if (!session?.user) {
+    return { success: false as const, error: '인증이 필요합니다' }
+  }
+
+  const parsed = createCustomerSchema.safeParse(formData)
+  if (!parsed.success) {
+    return {
+      success: false as const,
+      error: parsed.error.issues[0]?.message || '입력값이 올바르지 않습니다',
+    }
+  }
+
+  const data = parsed.data
+
+  try {
+    const customer = await createCustomer({
+      name: data.name,
+      company: data.company || undefined,
+      email: data.email || undefined,
+      phone: data.phone || undefined,
+      address: data.address || undefined,
+    })
+
+    revalidateTag('customers')
+
+    return { success: true as const, customer }
+  } catch (error) {
+    console.error('Failed to create customer:', error)
+    return { success: false as const, error: '고객 등록에 실패했습니다' }
   }
 }

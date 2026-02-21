@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import { Container } from '@/components/layout/container'
 import { Button } from '@/components/ui/button'
 import { QuoteDetail } from '@/components/quote/quote-detail'
 import { PublicLinkSection } from '@/components/quote/public-link-section'
+import { DeleteQuoteDialog } from '@/components/quote/delete-quote-dialog'
 import { getCachedQuoteById } from '@/lib/notion'
+import { QUOTE_STATUS } from '@/lib/constants'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -39,15 +41,34 @@ export default async function AdminQuoteDetailPage({ params }: PageProps) {
     notFound()
   }
 
+  const isEditable =
+    quote.status === QUOTE_STATUS.DRAFT ||
+    quote.status === QUOTE_STATUS.REJECTED
+
   return (
     <Container className="py-8">
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <Button variant="ghost" asChild>
           <Link href="/admin/dashboard">
             <ArrowLeft className="mr-2 h-4 w-4" />
             대시보드로 돌아가기
           </Link>
         </Button>
+
+        {isEditable && (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/admin/quote/${quote.id}/edit`}>
+                <Pencil className="mr-2 h-4 w-4" />
+                수정
+              </Link>
+            </Button>
+            <DeleteQuoteDialog
+              quoteId={quote.id}
+              quoteNumber={quote.quoteNumber}
+            />
+          </div>
+        )}
       </div>
 
       <div className="space-y-6">

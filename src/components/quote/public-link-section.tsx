@@ -2,10 +2,21 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Copy, Link as LinkIcon } from 'lucide-react'
+import { Copy, Link as LinkIcon, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { createPublicLink } from '@/app/actions/quote'
 
 interface PublicLinkSectionProps {
@@ -71,20 +82,46 @@ export function PublicLinkSection({
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               이 링크를 고객에게 공유하여 견적서를 확인하고 승인/거부할 수
               있습니다.
             </p>
           </>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               공개 링크를 생성하면 고객이 로그인 없이 견적서를 확인할 수
               있습니다.
             </p>
-            <Button onClick={handleGenerateLink} disabled={isGenerating}>
-              {isGenerating ? '생성 중...' : '공개 링크 생성'}
-            </Button>
+            <div className="flex items-start gap-2 rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                링크를 생성하면 견적서 상태가 &quot;발송됨&quot;으로 변경됩니다.
+              </p>
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button disabled={isGenerating}>
+                  {isGenerating ? '생성 중...' : '공개 링크 생성'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>링크를 생성하시겠습니까?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    공개 링크가 생성되며, 견적서 상태가 &quot;발송됨&quot;으로
+                    변경됩니다. 고객은 이 링크를 통해 견적서를 확인하고
+                    승인/거부할 수 있습니다.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleGenerateLink}>
+                    링크 생성
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </CardContent>

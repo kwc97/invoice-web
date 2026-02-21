@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
+import Link from 'next/link'
+import { Plus } from 'lucide-react'
 import { Container } from '@/components/layout/container'
+import { Button } from '@/components/ui/button'
 import { StatsCards } from '@/components/dashboard/stats-cards'
 import { SearchFilterClient } from '@/components/dashboard/search-filter-client'
 import { QuoteListTable } from '@/components/dashboard/quote-list-table'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getQuoteStats, getCachedQuotes } from '@/lib/notion'
+import { getQuoteStats, getCachedQuotes, expireOverdueQuotesInDb } from '@/lib/notion'
 import type { QuoteStatus } from '@/lib/constants'
 
 export const metadata: Metadata = {
@@ -38,8 +41,8 @@ async function StatsSection() {
  */
 function StatsCardsSkeleton() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-      {Array.from({ length: 5 }).map((_, i) => (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+      {Array.from({ length: 6 }).map((_, i) => (
         <div key={i} className="bg-card rounded-lg border p-6">
           <div className="flex items-center justify-between pb-2">
             <Skeleton className="h-4 w-20" />
@@ -111,6 +114,9 @@ function QuoteListSkeleton() {
  * - 견적서 클릭 시 상세 페이지 이동
  */
 export default async function AdminDashboardPage({ searchParams }: PageProps) {
+  // 만료 대상 견적서를 Notion DB에서 일괄 업데이트
+  await expireOverdueQuotesInDb()
+
   const params = await searchParams
 
   const search = params.search || undefined
@@ -120,11 +126,18 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
   return (
     <Container className="py-8">
       <div className="space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">대시보드</h1>
-          <p className="text-muted-foreground">
-            전체 견적서 현황을 한눈에 파악하고 관리할 수 있습니다.
-          </p>
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">대시보드</h1>
+            <p className="text-muted-foreground">
+              전체 견적서 현황을 한눈에 파악하고 관리할 수 있습니다.
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/admin/quote/new">
+              <Plus className="mr-2 h-4 w-4" />새 견적서
+            </Link>
+          </Button>
         </div>
 
         {/* 통계 카드 - Suspense로 스트리밍 */}
