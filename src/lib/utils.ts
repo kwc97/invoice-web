@@ -49,3 +49,14 @@ export function numberToKoreanCurrency(num: number): string {
 
   return parts.join('')
 }
+
+/**
+ * 한국 전화번호를 국제 형식으로 변환
+ * 예: "010-3307-9943" → "+82-10-3307-9943"
+ * 예: "031-704-2989" → "+82-31-704-2989"
+ * 문자열 내 모든 한국 전화번호 패턴을 자동 감지하여 변환
+ */
+export function formatKoreanPhoneToInternational(text: string): string {
+  // 0으로 시작하는 한국 전화번호 패턴 (예: 010-1234-5678, 031-704-2989, 02-1234-5678)
+  return text.replace(/\b0(\d{1,2})-(\d{3,4})-(\d{4})\b/g, '+82-$1-$2-$3')
+}

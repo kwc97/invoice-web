@@ -7,7 +7,10 @@ import { Document, Page, View, Text, Image } from '@react-pdf/renderer'
 import type { Quote } from '@/types/quote'
 import type { Dictionary } from '@/lib/i18n/types'
 import { COMPANY_INFO } from '@/lib/constants'
-import { numberToKoreanCurrency } from '@/lib/utils'
+import {
+  numberToKoreanCurrency,
+  formatKoreanPhoneToInternational,
+} from '@/lib/utils'
 import { createStyles } from './styles'
 
 // 폰트 등록 (사이드이펙트)
@@ -133,7 +136,7 @@ export function QuoteDocument({ quote, dictionary: dict }: QuoteDocumentProps) {
                   />
                   <SupplierInfoRow
                     header={dict.supplier.telFax}
-                    value={`${COMPANY_INFO.tel} / ${COMPANY_INFO.fax}`}
+                    value={`${dict.supplier.values.tel} / ${dict.supplier.values.fax}`}
                     styles={styles}
                     isLast
                   />
@@ -147,7 +150,10 @@ export function QuoteDocument({ quote, dictionary: dict }: QuoteDocumentProps) {
         {quote.contactPerson && (
           <View style={styles.contactBar}>
             <Text>
-              {dict.quote.contactPerson}: {quote.contactPerson}
+              {dict.quote.contactPerson}:{' '}
+              {quote.language === 'ko'
+                ? quote.contactPerson
+                : formatKoreanPhoneToInternational(quote.contactPerson!)}
             </Text>
           </View>
         )}

@@ -28,6 +28,8 @@ export const zh: Dictionary = {
       address: '韩国京畿道平泽市五城西路5-67',
       businessType: '建筑业, 制造业, 批发/零售',
       businessCategory: '机械安装, 机械设备, 机械装备',
+      tel: '+82-31-704-2989',
+      fax: '+82-31-704-2985',
     },
   },
   table: {
@@ -43,6 +45,11 @@ export const zh: Dictionary = {
     downloadPdf: '下载PDF',
     approve: '批准',
     reject: '拒绝',
+    confirmApproveTitle: '确认批准此报价单？',
+    confirmApproveDescription: '批准后将无法更改。是否继续？',
+    confirmRejectTitle: '确认拒绝此报价单？',
+    confirmRejectDescription: '拒绝后将无法更改。是否继续？',
+    cancel: '取消',
   },
   messages: {
     approved: '此报价单已被批准。',

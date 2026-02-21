@@ -28,6 +28,8 @@ export const it: Dictionary = {
       address: '5-67, Oseong-seo-ro, Pyeongtaek-si, Gyeonggi-do, Corea del Sud',
       businessType: 'Costruzione, Produzione, Commercio',
       businessCategory: 'Installazione macchine, Macchinari, Attrezzature',
+      tel: '+82-31-704-2989',
+      fax: '+82-31-704-2985',
     },
   },
   table: {
@@ -43,6 +45,13 @@ export const it: Dictionary = {
     downloadPdf: 'Scarica PDF',
     approve: 'Approva',
     reject: 'Rifiuta',
+    confirmApproveTitle: 'Approvare questo preventivo?',
+    confirmApproveDescription:
+      'Questa azione non può essere annullata. Vuoi continuare?',
+    confirmRejectTitle: 'Rifiutare questo preventivo?',
+    confirmRejectDescription:
+      'Questa azione non può essere annullata. Vuoi continuare?',
+    cancel: 'Annulla',
   },
   messages: {
     approved: 'Questo preventivo è stato approvato.',

@@ -6,6 +6,17 @@ import { toast } from 'sonner'
 import { Printer, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import type { QuoteStatus } from '@/lib/constants'
 import type { Dictionary } from '@/lib/i18n/types'
 import { QUOTE_STATUS } from '@/lib/constants'
@@ -114,24 +125,64 @@ export function QuoteActions({
 
         {!isCompleted && (
           <>
-            <Button
-              className="flex-1"
-              onClick={handleApprove}
-              disabled={isLoading}
-            >
-              <CheckCircle className="mr-2 h-4 w-4" />
-              {dict.actions.approve}
-            </Button>
+            {/* 승인 확인 다이얼로그 */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="flex-1" disabled={isLoading}>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  {dict.actions.approve}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {dict.actions.confirmApproveTitle}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {dict.actions.confirmApproveDescription}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{dict.actions.cancel}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleApprove}>
+                    {dict.actions.approve}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={handleReject}
-              disabled={isLoading}
-            >
-              <XCircle className="mr-2 h-4 w-4" />
-              {dict.actions.reject}
-            </Button>
+            {/* 거부 확인 다이얼로그 */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  disabled={isLoading}
+                >
+                  <XCircle className="mr-2 h-4 w-4" />
+                  {dict.actions.reject}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {dict.actions.confirmRejectTitle}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {dict.actions.confirmRejectDescription}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{dict.actions.cancel}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleReject}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {dict.actions.reject}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </div>

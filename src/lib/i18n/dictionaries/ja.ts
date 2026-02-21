@@ -28,6 +28,8 @@ export const ja: Dictionary = {
       address: '韓国京畿道平沢市五城西路5-67',
       businessType: '建設業, 製造業, 卸売/小売',
       businessCategory: '機械設置, 機械装置, 機械設備',
+      tel: '+82-31-704-2989',
+      fax: '+82-31-704-2985',
     },
   },
   table: {
@@ -43,6 +45,11 @@ export const ja: Dictionary = {
     downloadPdf: 'PDF ダウンロード',
     approve: '承認',
     reject: '却下',
+    confirmApproveTitle: 'この見積書を承認しますか？',
+    confirmApproveDescription: '承認後は変更できません。続行しますか？',
+    confirmRejectTitle: 'この見積書を却下しますか？',
+    confirmRejectDescription: '却下後は変更できません。続行しますか？',
+    cancel: 'キャンセル',
   },
   messages: {
     approved: 'この見積書は承認されました。',

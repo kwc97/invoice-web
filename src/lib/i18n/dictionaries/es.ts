@@ -28,6 +28,8 @@ export const es: Dictionary = {
       address: '5-67, Oseong-seo-ro, Pyeongtaek-si, Gyeonggi-do, Corea del Sur',
       businessType: 'Construcción, Manufactura, Comercio',
       businessCategory: 'Instalación de maquinaria, Maquinaria, Equipos',
+      tel: '+82-31-704-2989',
+      fax: '+82-31-704-2985',
     },
   },
   table: {
@@ -43,6 +45,13 @@ export const es: Dictionary = {
     downloadPdf: 'Descargar PDF',
     approve: 'Aprobar',
     reject: 'Rechazar',
+    confirmApproveTitle: '¿Aprobar esta cotización?',
+    confirmApproveDescription:
+      'Esta acción no se puede deshacer. ¿Desea continuar?',
+    confirmRejectTitle: '¿Rechazar esta cotización?',
+    confirmRejectDescription:
+      'Esta acción no se puede deshacer. ¿Desea continuar?',
+    cancel: 'Cancelar',
   },
   messages: {
     approved: 'Esta cotización ha sido aprobada.',

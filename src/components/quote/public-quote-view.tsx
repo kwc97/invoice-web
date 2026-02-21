@@ -2,7 +2,10 @@ import Image from 'next/image'
 import type { Quote } from '@/types/quote'
 import type { Dictionary } from '@/lib/i18n/types'
 import { CURRENCY, COMPANY_INFO } from '@/lib/constants'
-import { numberToKoreanCurrency } from '@/lib/utils'
+import {
+  numberToKoreanCurrency,
+  formatKoreanPhoneToInternational,
+} from '@/lib/utils'
 
 interface PublicQuoteViewProps {
   quote: Quote
@@ -138,7 +141,7 @@ export function PublicQuoteView({
                     {dict.supplier.telFax}
                   </td>
                   <td className="border border-black p-1 text-xs">
-                    {COMPANY_INFO.tel} / {COMPANY_INFO.fax}
+                    {dict.supplier.values.tel} / {dict.supplier.values.fax}
                   </td>
                 </tr>
               </tbody>
@@ -150,7 +153,9 @@ export function PublicQuoteView({
         {quote.contactPerson && (
           <div className="mb-4 border border-black bg-gray-50 px-4 py-2 text-sm">
             <span className="font-medium">{dict.quote.contactPerson}: </span>
-            {quote.contactPerson}
+            {quote.language === 'ko'
+              ? quote.contactPerson
+              : formatKoreanPhoneToInternational(quote.contactPerson!)}
           </div>
         )}
 

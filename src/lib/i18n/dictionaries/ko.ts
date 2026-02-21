@@ -28,6 +28,8 @@ export const ko: Dictionary = {
       address: '경기도 평택시 오성서로 5-67',
       businessType: '건설업,제조업,도소매',
       businessCategory: '기계설치,기계장치,기계설비',
+      tel: '031-704-2989',
+      fax: '031-704-2985',
     },
   },
   table: {
@@ -43,6 +45,13 @@ export const ko: Dictionary = {
     downloadPdf: 'PDF 다운로드',
     approve: '승인',
     reject: '거부',
+    confirmApproveTitle: '견적서를 승인하시겠습니까?',
+    confirmApproveDescription:
+      '승인 후에는 변경할 수 없습니다. 계속 진행하시겠습니까?',
+    confirmRejectTitle: '견적서를 거부하시겠습니까?',
+    confirmRejectDescription:
+      '거부 후에는 변경할 수 없습니다. 계속 진행하시겠습니까?',
+    cancel: '취소',
   },
   messages: {
     approved: '이 견적서는 승인되었습니다.',

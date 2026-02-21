@@ -47,6 +47,8 @@ export interface Dictionary {
       address: string
       businessType: string
       businessCategory: string
+      tel: string
+      fax: string
     }
   }
   table: {
@@ -62,6 +64,11 @@ export interface Dictionary {
     downloadPdf: string
     approve: string
     reject: string
+    confirmApproveTitle: string
+    confirmApproveDescription: string
+    confirmRejectTitle: string
+    confirmRejectDescription: string
+    cancel: string
   }
   messages: {
     approved: string
