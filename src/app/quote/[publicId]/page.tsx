@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { after } from 'next/server'
 import { auth } from '@/auth'
 import { PublicQuoteView } from '@/components/quote/public-quote-view'
 import { QuoteActions } from '@/components/quote/quote-actions'
+import { ConfirmViewTracker } from '@/components/quote/confirm-view-tracker'
 import { AlertTriangle, FileX, Mail } from 'lucide-react'
 import { getCachedQuoteByPublicLink } from '@/lib/notion'
-import { confirmQuoteView } from '@/app/actions/quote'
 import { getDictionary, translateQuoteContent } from '@/lib/i18n'
 import { formatDateByLanguage } from '@/lib/i18n/format'
 import { COMPANY_INFO, QUOTE_STATUS } from '@/lib/constants'
@@ -53,9 +52,7 @@ export default async function PublicQuotePage({ params }: PageProps) {
   const session = await auth()
   const isAdmin = !!session?.user
 
-  if (!isAdmin && quote.status === QUOTE_STATUS.SENT) {
-    after(() => confirmQuoteView(quote.id))
-  }
+  const shouldTrackView = !isAdmin && quote.status === QUOTE_STATUS.SENT
 
   const lang = quote.language ?? 'ko'
   const dict = getDictionary(lang)
@@ -145,6 +142,7 @@ export default async function PublicQuotePage({ params }: PageProps) {
 
   return (
     <div className="bg-muted/30 min-h-screen px-4 py-12 print:bg-white print:p-0">
+      {shouldTrackView && <ConfirmViewTracker quoteId={quote.id} />}
       <div className="space-y-6 print:space-y-0">
         <PublicQuoteView quote={formattedQuote} dictionary={dict} />
         <div className="print:hidden">
