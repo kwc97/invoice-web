@@ -99,7 +99,7 @@ export function SearchFilterClient() {
       </div>
 
       <Select
-        defaultValue={initialStatus}
+        value={initialStatus}
         onValueChange={handleStatusChange}
         disabled={isPending}
       >

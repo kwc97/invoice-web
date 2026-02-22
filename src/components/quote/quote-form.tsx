@@ -407,7 +407,7 @@ export function QuoteForm({
                       <FormItem>
                         <FormLabel>단위</FormLabel>
                         <FormControl>
-                          <Input placeholder="예: EA, 식" {...field} />
+                          <Input placeholder="예: EA, 인, 식" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

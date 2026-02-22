@@ -8,7 +8,11 @@ import { StatsCards } from '@/components/dashboard/stats-cards'
 import { SearchFilterClient } from '@/components/dashboard/search-filter-client'
 import { QuoteListTable } from '@/components/dashboard/quote-list-table'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getQuoteStats, getCachedQuotes, expireOverdueQuotesInDb } from '@/lib/notion'
+import {
+  getQuoteStats,
+  getCachedQuotes,
+  expireOverdueQuotesInDb,
+} from '@/lib/notion'
 import type { QuoteStatus } from '@/lib/constants'
 
 export const metadata: Metadata = {
@@ -57,6 +61,7 @@ function StatsCardsSkeleton() {
 
 /**
  * 견적서 목록 서버 컴포넌트
+ * 에러 발생 시 빈 목록 표시 (unstable_cache에 에러가 캐시되지 않음)
  */
 async function QuoteListSection({
   search,
@@ -65,9 +70,13 @@ async function QuoteListSection({
   search?: string
   status?: QuoteStatus
 }) {
-  const quotes = await getCachedQuotes(search, status)
-
-  return <QuoteListTable quotes={quotes} />
+  try {
+    const quotes = await getCachedQuotes(search, status)
+    return <QuoteListTable quotes={quotes} />
+  } catch (error) {
+    console.error('Failed to load quotes:', error)
+    return <QuoteListTable quotes={[]} />
+  }
 }
 
 /**
@@ -146,8 +155,10 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
         </Suspense>
 
         <div className="space-y-4">
-          {/* 검색/필터 - 클라이언트 컴포넌트 */}
-          <SearchFilterClient />
+          {/* 검색/필터 - useSearchParams 사용으로 Suspense 필수 */}
+          <Suspense>
+            <SearchFilterClient />
+          </Suspense>
 
           {/* 견적서 목록 - Suspense로 스트리밍 */}
           <Suspense fallback={<QuoteListSkeleton />}>

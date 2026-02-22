@@ -45,6 +45,9 @@ export default async function AdminQuoteDetailPage({ params }: PageProps) {
     quote.status === QUOTE_STATUS.DRAFT ||
     quote.status === QUOTE_STATUS.REJECTED
 
+  const isDeletable =
+    isEditable || quote.status === QUOTE_STATUS.EXPIRED
+
   return (
     <Container className="py-8">
       <div className="mb-6 flex items-center justify-between">
@@ -55,18 +58,22 @@ export default async function AdminQuoteDetailPage({ params }: PageProps) {
           </Link>
         </Button>
 
-        {isEditable && (
+        {(isEditable || isDeletable) && (
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/admin/quote/${quote.id}/edit`}>
-                <Pencil className="mr-2 h-4 w-4" />
-                수정
-              </Link>
-            </Button>
-            <DeleteQuoteDialog
-              quoteId={quote.id}
-              quoteNumber={quote.quoteNumber}
-            />
+            {isEditable && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/admin/quote/${quote.id}/edit`}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  수정
+                </Link>
+              </Button>
+            )}
+            {isDeletable && (
+              <DeleteQuoteDialog
+                quoteId={quote.id}
+                quoteNumber={quote.quoteNumber}
+              />
+            )}
           </div>
         )}
       </div>

@@ -70,76 +70,71 @@ export async function getQuotes(options?: {
   status?: QuoteStatus
   pageSize?: number
 }): Promise<Quote[]> {
-  try {
-    // 필터 구성 (Status는 Notion 'status' 타입)
-    const filter: any = options?.status
-      ? {
-          property: 'Status',
-          status: {
-            equals: options.status,
-          },
-        }
-      : undefined
-
-    const response = await (notion.databases as any).query({
-      database_id: NOTION_DB_IDS.QUOTES,
-      filter,
-      sorts: [
-        {
-          property: 'Issue Date',
-          direction: 'descending',
+  // 필터 구성 (Status는 Notion 'status' 타입)
+  const filter: any = options?.status
+    ? {
+        property: 'Status',
+        status: {
+          equals: options.status,
         },
-      ],
-      page_size: options?.pageSize || 100,
+      }
+    : undefined
+
+  const response = await (notion.databases as any).query({
+    database_id: NOTION_DB_IDS.QUOTES,
+    filter,
+    sorts: [
+      {
+        property: 'Issue Date',
+        direction: 'descending',
+      },
+    ],
+    page_size: options?.pageSize || 100,
+  })
+
+  // Relation 데이터 병렬 조회
+  const quotesWithRelations = await Promise.all(
+    response.results.map(async (page: any) => {
+      const quotePage = page as NotionQuotePage
+
+      // Customer와 QuoteItems 병렬 조회
+      const customerRelation = quotePage.properties.Customer.relation[0]
+      if (!customerRelation) {
+        console.warn('Quote has no customer relation:', quotePage.id)
+        return null
+      }
+
+      const [customer, items] = await Promise.all([
+        getCustomerById(customerRelation.id),
+        getQuoteItemsByQuoteId(quotePage.id),
+      ])
+
+      if (!customer) {
+        console.warn('Customer not found for quote:', quotePage.id)
+        return null
+      }
+
+      return mapNotionQuoteToQuote(quotePage, customer, items)
     })
+  )
 
-    // Relation 데이터 병렬 조회
-    const quotesWithRelations = await Promise.all(
-      response.results.map(async (page: any) => {
-        const quotePage = page as NotionQuotePage
+  // null 제거 및 검색 필터 적용
+  let quotes = quotesWithRelations.filter(
+    (q: Quote | null): q is Quote => q !== null
+  )
 
-        // Customer와 QuoteItems 병렬 조회
-        const customerRelation = quotePage.properties.Customer.relation[0]
-        if (!customerRelation) {
-          console.warn('Quote has no customer relation:', quotePage.id)
-          return null
-        }
-
-        const [customer, items] = await Promise.all([
-          getCustomerById(customerRelation.id),
-          getQuoteItemsByQuoteId(quotePage.id),
-        ])
-
-        if (!customer) {
-          console.warn('Customer not found for quote:', quotePage.id)
-          return null
-        }
-
-        return mapNotionQuoteToQuote(quotePage, customer, items)
-      })
+  // 클라이언트 사이드 검색 (Notion API 검색 제한으로 인해)
+  if (options?.search) {
+    const searchLower = options.search.toLowerCase()
+    quotes = quotes.filter(
+      (q: Quote) =>
+        q.quoteNumber.toLowerCase().includes(searchLower) ||
+        (q.customer?.name.toLowerCase().includes(searchLower) ?? false) ||
+        (q.projectName?.toLowerCase().includes(searchLower) ?? false)
     )
-
-    // null 제거 및 검색 필터 적용
-    let quotes = quotesWithRelations.filter(
-      (q: Quote | null): q is Quote => q !== null
-    )
-
-    // 클라이언트 사이드 검색 (Notion API 검색 제한으로 인해)
-    if (options?.search) {
-      const searchLower = options.search.toLowerCase()
-      quotes = quotes.filter(
-        (q: Quote) =>
-          q.quoteNumber.toLowerCase().includes(searchLower) ||
-          (q.customer?.name.toLowerCase().includes(searchLower) ?? false) ||
-          (q.projectName?.toLowerCase().includes(searchLower) ?? false)
-      )
-    }
-
-    return quotes
-  } catch (error) {
-    console.error('Failed to fetch quotes:', error)
-    return []
   }
+
+  return quotes
 }
 
 /**

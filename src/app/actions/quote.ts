@@ -166,8 +166,15 @@ export async function rejectQuote(quoteId: string) {
   }
 }
 
-/** 수정/삭제 가능한 상태 */
+/** 수정 가능한 상태 */
 const EDITABLE_STATUSES = [QUOTE_STATUS.DRAFT, QUOTE_STATUS.REJECTED] as const
+
+/** 삭제 가능한 상태 */
+const DELETABLE_STATUSES = [
+  QUOTE_STATUS.DRAFT,
+  QUOTE_STATUS.REJECTED,
+  QUOTE_STATUS.EXPIRED,
+] as const
 
 /** 캐시 무효화 헬퍼 */
 function invalidateQuoteCaches(quoteId?: string) {
@@ -351,8 +358,8 @@ export async function deleteQuoteAction(quoteId: string) {
     return { success: false, error: '견적서를 찾을 수 없습니다' }
   }
   if (
-    !EDITABLE_STATUSES.includes(
-      quote.status as (typeof EDITABLE_STATUSES)[number]
+    !DELETABLE_STATUSES.includes(
+      quote.status as (typeof DELETABLE_STATUSES)[number]
     )
   ) {
     return { success: false, error: '삭제할 수 없는 상태입니다' }
