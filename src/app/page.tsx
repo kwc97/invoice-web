@@ -14,9 +14,12 @@ import {
   CheckCircle2,
   Download,
   FileText,
+  Info,
   Link2,
+  Pencil,
   Share2,
   Shield,
+  Trash2,
   Zap,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -31,7 +34,7 @@ const WORKFLOW_STEPS = [
     icon: FileText,
     title: '견적서 작성',
     description:
-      'Notion 데이터베이스에서 견적서를 작성하고 항목, 수량, 금액을 입력합니다.',
+      '웹에서 직접 견적서를 작성하고 항목, 수량, 금액을 입력합니다. 작성된 데이터는 Notion에 자동 저장됩니다.',
   },
   {
     step: '02',
@@ -50,14 +53,38 @@ const WORKFLOW_STEPS = [
 ] as const
 
 /**
+ * 상태별 수정/삭제 권한 안내 데이터
+ */
+const STATUS_PERMISSIONS = [
+  {
+    statuses: ['작성중', '거부됨'],
+    canEdit: true,
+    canDelete: true,
+    description: '내용 수정 및 삭제가 자유롭게 가능합니다.',
+  },
+  {
+    statuses: ['만료됨'],
+    canEdit: false,
+    canDelete: true,
+    description: '유효기간이 지난 견적서로, 삭제만 가능합니다.',
+  },
+  {
+    statuses: ['발송됨', '확인됨', '승인됨'],
+    canEdit: false,
+    canDelete: false,
+    description: '클라이언트에게 전달된 상태로, 수정 및 삭제가 불가합니다.',
+  },
+] as const
+
+/**
  * 주요 기능 특징 데이터
  */
 const FEATURES = [
   {
     icon: Zap,
-    title: 'Notion 연동',
+    title: 'Notion 자동 저장',
     description:
-      'Notion 데이터베이스와 실시간으로 연동되어 별도 DB 없이 관리합니다.',
+      '웹에서 작성한 견적서가 Notion에 자동 저장되어 별도 DB 없이 관리합니다.',
   },
   {
     icon: Download,
@@ -137,8 +164,8 @@ export default function Home() {
 
             {/* 설명 문구 */}
             <p className="text-muted-foreground mb-10 max-w-xl text-base sm:text-lg">
-              Notion 데이터베이스 기반으로 견적서를 작성하고, 공유 링크로
-              클라이언트에게 전달하여 빠르게 승인을 받으세요.
+              웹에서 견적서를 작성하고, 공유 링크로 클라이언트에게 전달하여
+              빠르게 승인을 받으세요. 모든 데이터는 Notion에 자동 저장됩니다.
             </p>
 
             {/* CTA 버튼 그룹 */}
@@ -202,6 +229,68 @@ export default function Home() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* ===== 상태별 권한 안내 섹션 ===== */}
+      <section className="border-t py-16 sm:py-24">
+        <Container size="md">
+          <div className="mb-12 text-center">
+            <p className="text-primary mb-2 text-sm font-medium tracking-widest uppercase">
+              Status Guide
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              상태별 수정/삭제 안내
+            </h2>
+            <p className="text-muted-foreground mt-3">
+              견적서 상태에 따라 수정 및 삭제 가능 여부가 달라집니다.
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-2xl space-y-4">
+            {STATUS_PERMISSIONS.map(
+              ({ statuses, canEdit, canDelete, description }) => (
+                <Card key={statuses.join('-')}>
+                  <CardContent className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="space-y-1.5">
+                      <div className="flex flex-wrap gap-2">
+                        {statuses.map(s => (
+                          <Badge key={s} variant="secondary">
+                            {s}
+                          </Badge>
+                        ))}
+                      </div>
+                      <p className="text-muted-foreground text-sm">
+                        {description}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-3">
+                      <span
+                        className={`inline-flex items-center gap-1 text-sm font-medium ${canEdit ? 'text-primary' : 'text-muted-foreground/50'}`}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        수정 {canEdit ? '가능' : '불가'}
+                      </span>
+                      <span
+                        className={`inline-flex items-center gap-1 text-sm font-medium ${canDelete ? 'text-primary' : 'text-muted-foreground/50'}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        삭제 {canDelete ? '가능' : '불가'}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            )}
+
+            <div className="bg-muted/50 flex items-start gap-2 rounded-lg p-4">
+              <Info className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                클라이언트에게 발송된 견적서는 데이터 무결성을 위해 수정 및
+                삭제가 제한됩니다. 변경이 필요한 경우 새 견적서를 작성해 주세요.
+              </p>
+            </div>
           </div>
         </Container>
       </section>
