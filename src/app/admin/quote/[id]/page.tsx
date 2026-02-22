@@ -48,9 +48,7 @@ export default async function AdminQuoteDetailPage({ params }: PageProps) {
 
   const isDeletable = isEditable || quote.status === QUOTE_STATUS.EXPIRED
 
-  const isRecallable =
-    quote.status === QUOTE_STATUS.SENT ||
-    quote.status === QUOTE_STATUS.CONFIRMED
+  const isRecallable = quote.status === QUOTE_STATUS.SENT
 
   return (
     <Container className="py-8">

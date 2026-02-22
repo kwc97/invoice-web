@@ -114,10 +114,12 @@ export function mapNotionQuoteToQuote(
 ): Quote {
   const quoteNumber = extractTitle(page.properties.Name?.title)
 
-  // Status는 'status' 타입 (Select가 아님)
+  // Status는 Notion 'status' 타입 (select 타입과 구조가 다름)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const statusProp = page.properties.Status as any
-  const status = statusProp?.status?.name as QuoteStatus
+  const status = (statusProp?.status?.name ??
+    statusProp?.select?.name ??
+    '작성중') as QuoteStatus
 
   // Issue Date와 Valid Until은 'date' 타입 (Rich Text가 아님)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
