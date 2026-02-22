@@ -181,10 +181,15 @@ export async function recallQuoteAction(quoteId: string) {
     if (!quote) {
       return { success: false, error: '견적서를 찾을 수 없습니다' }
     }
-    if (quote.status !== QUOTE_STATUS.SENT) {
+    const recallableStatuses = [QUOTE_STATUS.SENT, QUOTE_STATUS.CONFIRMED]
+    if (
+      !recallableStatuses.includes(
+        quote.status as (typeof recallableStatuses)[number]
+      )
+    ) {
       return {
         success: false,
-        error: '발송됨 상태의 견적서만 회수할 수 있습니다',
+        error: '발송됨 또는 확인됨 상태의 견적서만 회수할 수 있습니다',
       }
     }
 

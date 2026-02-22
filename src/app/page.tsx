@@ -66,7 +66,7 @@ const STATUS_PERMISSIONS = [
     description: '내용 수정 및 삭제가 자유롭게 가능합니다.',
   },
   {
-    statuses: ['발송됨'],
+    statuses: ['발송됨', '확인됨'],
     canEdit: false,
     canDelete: false,
     canRecall: true,
@@ -74,12 +74,11 @@ const STATUS_PERMISSIONS = [
       '클라이언트에게 전달된 상태로, 회수하여 작성중으로 되돌릴 수 있습니다.',
   },
   {
-    statuses: ['확인됨', '승인됨'],
+    statuses: ['승인됨'],
     canEdit: false,
     canDelete: false,
     canRecall: false,
-    description:
-      '클라이언트가 확인 또는 승인한 상태로, 수정 및 삭제가 불가합니다.',
+    description: '클라이언트가 승인한 상태로, 수정 및 삭제가 불가합니다.',
   },
   {
     statuses: ['만료됨'],

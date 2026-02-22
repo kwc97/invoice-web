@@ -48,7 +48,9 @@ export default async function AdminQuoteDetailPage({ params }: PageProps) {
 
   const isDeletable = isEditable || quote.status === QUOTE_STATUS.EXPIRED
 
-  const isRecallable = quote.status === QUOTE_STATUS.SENT
+  const isRecallable =
+    quote.status === QUOTE_STATUS.SENT ||
+    quote.status === QUOTE_STATUS.CONFIRMED
 
   return (
     <Container className="py-8">
@@ -86,6 +88,7 @@ export default async function AdminQuoteDetailPage({ params }: PageProps) {
         <PublicLinkSection
           quoteId={quote.id}
           initialPublicLinkId={quote.publicLinkId}
+          quoteStatus={quote.status}
         />
       </div>
     </Container>

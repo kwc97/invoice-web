@@ -22,6 +22,7 @@ import { createPublicLink } from '@/app/actions/quote'
 interface PublicLinkSectionProps {
   quoteId: string
   initialPublicLinkId: string | null
+  quoteStatus: string
 }
 
 /**
@@ -31,13 +32,17 @@ interface PublicLinkSectionProps {
 export function PublicLinkSection({
   quoteId,
   initialPublicLinkId,
+  quoteStatus,
 }: PublicLinkSectionProps) {
   const [publicLinkId, setPublicLinkId] = useState(initialPublicLinkId)
   const [isGenerating, setIsGenerating] = useState(false)
 
-  const publicUrl = publicLinkId
-    ? `${window.location.origin}/quote/${publicLinkId}`
-    : null
+  // DRAFT 상태(회수됨 포함)에서는 기존 링크를 숨기고 재생성 가능하도록 함
+  const isDraft = quoteStatus === '작성중'
+  const publicUrl =
+    publicLinkId && !isDraft
+      ? `${window.location.origin}/quote/${publicLinkId}`
+      : null
 
   const handleGenerateLink = async () => {
     setIsGenerating(true)
