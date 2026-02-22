@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Download,
   FileText,
+  Globe,
   Info,
   Link2,
   Pencil,
@@ -85,6 +86,12 @@ const FEATURES = [
     title: 'Notion 자동 저장',
     description:
       '웹에서 작성한 견적서가 Notion에 자동 저장되어 별도 DB 없이 관리합니다.',
+  },
+  {
+    icon: Globe,
+    title: '6개 언어 지원',
+    description:
+      '한국어, English, 中文, 日本語, Italiano, Español을 지원하여 해외 클라이언트에게도 견적서를 전달할 수 있습니다.',
   },
   {
     icon: Download,
@@ -309,7 +316,7 @@ export default function Home() {
           </div>
 
           {/* 기능 카드 그리드 */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map(({ icon: Icon, title, description }) => (
               <Card key={title} className="transition-shadow hover:shadow-md">
                 <CardHeader className="pb-2">
