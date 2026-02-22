@@ -63,6 +63,9 @@ export const ja: Dictionary = {
     expiredDescription:
       'この見積書の有効期限が過ぎており、無効となっています。最新の見積書が必要な場合は、担当者に新しい見積書をご依頼ください。',
     expiredContact: '新しい見積書を依頼',
+    unavailableTitle: 'この見積書は現在確認できません',
+    unavailableDescription:
+      'ご依頼の見積書は現在閲覧できない状態です。詳細については担当者までお問い合わせください。',
   },
   koreanAmount: {
     prefix: null,

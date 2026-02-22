@@ -64,6 +64,9 @@ export const ko: Dictionary = {
     expiredDescription:
       '본 견적서의 유효기간이 경과하여 더 이상 유효하지 않습니다. 최신 견적이 필요하시면 담당자에게 새로운 견적서를 요청해 주시기 바랍니다.',
     expiredContact: '새 견적서 요청',
+    unavailableTitle: '이 견적서는 현재 확인할 수 없습니다',
+    unavailableDescription:
+      '요청하신 견적서는 현재 열람이 불가능한 상태입니다. 자세한 사항은 담당자에게 문의해 주시기 바랍니다.',
   },
   koreanAmount: {
     prefix: '일금 ',

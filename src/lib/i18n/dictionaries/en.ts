@@ -65,6 +65,9 @@ export const en: Dictionary = {
     expiredDescription:
       'The validity period of this quotation has passed and it is no longer valid. If you need an updated quotation, please contact our representative to request a new one.',
     expiredContact: 'Request new quotation',
+    unavailableTitle: 'This quotation is currently unavailable',
+    unavailableDescription:
+      'The requested quotation is not available for viewing at this time. Please contact our representative for further details.',
   },
   koreanAmount: {
     prefix: null,

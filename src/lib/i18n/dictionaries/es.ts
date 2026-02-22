@@ -65,6 +65,9 @@ export const es: Dictionary = {
     expiredDescription:
       'El período de validez de esta cotización ha pasado y ya no es válida. Si necesita una cotización actualizada, comuníquese con nuestro representante para solicitar una nueva.',
     expiredContact: 'Solicitar nueva cotización',
+    unavailableTitle: 'Esta cotización no está disponible actualmente',
+    unavailableDescription:
+      'La cotización solicitada no está disponible para su visualización en este momento. Comuníquese con nuestro representante para más detalles.',
   },
   koreanAmount: {
     prefix: null,

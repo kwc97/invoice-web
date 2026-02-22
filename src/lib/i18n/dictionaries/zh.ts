@@ -62,6 +62,9 @@ export const zh: Dictionary = {
     expiredDescription:
       '此报价单的有效期已过，不再有效。如需最新报价，请联系我们的负责人申请新的报价单。',
     expiredContact: '申请新报价',
+    unavailableTitle: '此报价单目前无法查看',
+    unavailableDescription:
+      '您请求的报价单目前不可查看。如需详细信息，请联系我们的负责人。',
   },
   koreanAmount: {
     prefix: null,

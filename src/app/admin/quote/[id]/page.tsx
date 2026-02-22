@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { QuoteDetail } from '@/components/quote/quote-detail'
 import { PublicLinkSection } from '@/components/quote/public-link-section'
 import { DeleteQuoteDialog } from '@/components/quote/delete-quote-dialog'
+import { RecallQuoteDialog } from '@/components/quote/recall-quote-dialog'
 import { getCachedQuoteById } from '@/lib/notion'
 import { QUOTE_STATUS } from '@/lib/constants'
 
@@ -45,8 +46,9 @@ export default async function AdminQuoteDetailPage({ params }: PageProps) {
     quote.status === QUOTE_STATUS.DRAFT ||
     quote.status === QUOTE_STATUS.REJECTED
 
-  const isDeletable =
-    isEditable || quote.status === QUOTE_STATUS.EXPIRED
+  const isDeletable = isEditable || quote.status === QUOTE_STATUS.EXPIRED
+
+  const isRecallable = quote.status === QUOTE_STATUS.SENT
 
   return (
     <Container className="py-8">
@@ -58,8 +60,9 @@ export default async function AdminQuoteDetailPage({ params }: PageProps) {
           </Link>
         </Button>
 
-        {(isEditable || isDeletable) && (
+        {(isEditable || isDeletable || isRecallable) && (
           <div className="flex items-center gap-2">
+            {isRecallable && <RecallQuoteDialog quoteId={quote.id} />}
             {isEditable && (
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/admin/quote/${quote.id}/edit`}>

@@ -166,6 +166,49 @@ export async function rejectQuote(quoteId: string) {
   }
 }
 
+/**
+ * 견적서 회수 (발송됨 → 작성중)
+ * 관리자가 발송된 견적서를 회수하여 공개 링크를 비활성화
+ */
+export async function recallQuoteAction(quoteId: string) {
+  const session = await auth()
+  if (!session?.user) {
+    return { success: false, error: '인증이 필요합니다' }
+  }
+
+  try {
+    const quote = await getQuoteById(quoteId)
+    if (!quote) {
+      return { success: false, error: '견적서를 찾을 수 없습니다' }
+    }
+    if (quote.status !== QUOTE_STATUS.SENT) {
+      return {
+        success: false,
+        error: '발송됨 상태의 견적서만 회수할 수 있습니다',
+      }
+    }
+
+    await updateQuoteStatus(quoteId, QUOTE_STATUS.DRAFT)
+
+    // 캐시 무효화
+    revalidateTag('quotes')
+    revalidatePath('/admin/dashboard')
+    revalidatePath(`/admin/quote/${quoteId}`)
+    revalidatePath(`/quote/[publicId]`, 'page')
+
+    return {
+      success: true,
+      message: '견적서가 회수되었습니다',
+    }
+  } catch (error) {
+    console.error('Failed to recall quote:', error)
+    return {
+      success: false,
+      error: '견적서 회수에 실패했습니다',
+    }
+  }
+}
+
 /** 수정 가능한 상태 */
 const EDITABLE_STATUSES = [QUOTE_STATUS.DRAFT, QUOTE_STATUS.REJECTED] as const
 

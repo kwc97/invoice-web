@@ -4,7 +4,7 @@ import { after } from 'next/server'
 import { auth } from '@/auth'
 import { PublicQuoteView } from '@/components/quote/public-quote-view'
 import { QuoteActions } from '@/components/quote/quote-actions'
-import { AlertTriangle, Mail } from 'lucide-react'
+import { AlertTriangle, FileX, Mail } from 'lucide-react'
 import { getCachedQuoteByPublicLink } from '@/lib/notion'
 import { confirmQuoteView } from '@/app/actions/quote'
 import { getDictionary, translateQuoteContent } from '@/lib/i18n'
@@ -71,8 +71,45 @@ export default async function PublicQuotePage({ params }: PageProps) {
     validUntil: formatDateByLanguage(translatedQuote.validUntil, lang),
   }
 
-  // DB 상태 기반 만료 확인
+  // 공개 가능 상태 확인
+  const publicStatuses = [
+    QUOTE_STATUS.SENT,
+    QUOTE_STATUS.CONFIRMED,
+    QUOTE_STATUS.APPROVED,
+    QUOTE_STATUS.REJECTED,
+  ] as const
   const isExpired = quote.status === QUOTE_STATUS.EXPIRED
+  const isPublicAccessible =
+    isExpired ||
+    publicStatuses.includes(quote.status as (typeof publicStatuses)[number])
+
+  // 비공개 상태 (DRAFT 등): 접근 차단 안내 화면
+  if (!isPublicAccessible) {
+    return (
+      <div className="bg-muted/30 flex min-h-screen items-center justify-center px-4 py-12">
+        <div className="mx-auto max-w-lg text-center">
+          <div className="bg-background rounded-lg border p-8 shadow-lg">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+              <FileX className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+            </div>
+            <h1 className="mb-3 text-2xl font-bold">
+              {dict.messages.unavailableTitle}
+            </h1>
+            <p className="text-muted-foreground mb-6">
+              {dict.messages.unavailableDescription}
+            </p>
+            <a
+              href={`mailto:${COMPANY_INFO.email ?? ''}?subject=${encodeURIComponent(dict.messages.expiredContact + ' - ' + quote.quoteNumber)}`}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-medium transition-colors"
+            >
+              <Mail className="h-4 w-4" />
+              {dict.messages.expiredContact}
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   // 만료된 견적서: 전용 안내 화면
   if (isExpired) {

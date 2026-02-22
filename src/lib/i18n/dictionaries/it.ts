@@ -65,6 +65,9 @@ export const it: Dictionary = {
     expiredDescription:
       'Il periodo di validità di questo preventivo è scaduto e non è più valido. Se necessita di un preventivo aggiornato, contatti il nostro referente per richiederne uno nuovo.',
     expiredContact: 'Richiedi nuovo preventivo',
+    unavailableTitle: 'Questo preventivo non è attualmente disponibile',
+    unavailableDescription:
+      'Il preventivo richiesto non è attualmente disponibile per la consultazione. Per ulteriori dettagli, contatti il nostro referente.',
   },
   koreanAmount: {
     prefix: null,

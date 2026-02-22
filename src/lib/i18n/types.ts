@@ -80,6 +80,8 @@ export interface Dictionary {
     expiredTitle: string
     expiredDescription: string
     expiredContact: string
+    unavailableTitle: string
+    unavailableDescription: string
   }
   /** 한국어 금액 표기 (일금 XXX원) — null이면 미표시 */
   koreanAmount: {

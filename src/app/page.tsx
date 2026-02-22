@@ -21,6 +21,7 @@ import {
   Share2,
   Shield,
   Trash2,
+  Undo2,
   Zap,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -61,19 +62,31 @@ const STATUS_PERMISSIONS = [
     statuses: ['작성중', '거부됨'],
     canEdit: true,
     canDelete: true,
+    canRecall: false,
     description: '내용 수정 및 삭제가 자유롭게 가능합니다.',
+  },
+  {
+    statuses: ['발송됨'],
+    canEdit: false,
+    canDelete: false,
+    canRecall: true,
+    description:
+      '클라이언트에게 전달된 상태로, 회수하여 작성중으로 되돌릴 수 있습니다.',
+  },
+  {
+    statuses: ['확인됨', '승인됨'],
+    canEdit: false,
+    canDelete: false,
+    canRecall: false,
+    description:
+      '클라이언트가 확인 또는 승인한 상태로, 수정 및 삭제가 불가합니다.',
   },
   {
     statuses: ['만료됨'],
     canEdit: false,
     canDelete: true,
+    canRecall: false,
     description: '유효기간이 지난 견적서로, 삭제만 가능합니다.',
-  },
-  {
-    statuses: ['발송됨', '확인됨', '승인됨'],
-    canEdit: false,
-    canDelete: false,
-    description: '클라이언트에게 전달된 상태로, 수정 및 삭제가 불가합니다.',
   },
 ] as const
 
@@ -257,7 +270,7 @@ export default function Home() {
 
           <div className="mx-auto max-w-2xl space-y-4">
             {STATUS_PERMISSIONS.map(
-              ({ statuses, canEdit, canDelete, description }) => (
+              ({ statuses, canEdit, canDelete, canRecall, description }) => (
                 <Card key={statuses.join('-')}>
                   <CardContent className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
                     <div className="space-y-1.5">
@@ -285,6 +298,12 @@ export default function Home() {
                         <Trash2 className="h-3.5 w-3.5" />
                         삭제 {canDelete ? '가능' : '불가'}
                       </span>
+                      {canRecall && (
+                        <span className="text-primary inline-flex items-center gap-1 text-sm font-medium">
+                          <Undo2 className="h-3.5 w-3.5" />
+                          회수 가능
+                        </span>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -295,7 +314,9 @@ export default function Home() {
               <Info className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
               <p className="text-muted-foreground text-xs leading-relaxed">
                 클라이언트에게 발송된 견적서는 데이터 무결성을 위해 수정 및
-                삭제가 제한됩니다. 변경이 필요한 경우 새 견적서를 작성해 주세요.
+                삭제가 제한됩니다. 발송됨 상태에서는 회수하여 작성중으로 되돌릴
+                수 있으며, 변경이 필요한 경우 회수 후 수정하거나 새 견적서를
+                작성해 주세요.
               </p>
             </div>
           </div>
