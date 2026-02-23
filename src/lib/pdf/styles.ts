@@ -70,10 +70,10 @@ export function createStyles(fontFamily: string) {
 
     /** 로고 텍스트 */
     logoText: {
-      fontSize: 14,
+      fontSize: 11,
       fontWeight: 'bold',
       color: COLORS.text,
-      marginBottom: 8,
+      marginBottom: 6,
     },
 
     /** 견적 기본정보 행 */
