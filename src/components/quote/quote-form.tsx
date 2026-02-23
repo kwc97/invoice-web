@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -24,10 +24,20 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { quoteFormSchema, type QuoteFormData } from '@/lib/validations/quote'
-import { createQuoteAction, updateQuoteAction } from '@/app/actions/quote'
+import {
+  createQuoteAction,
+  updateQuoteAction,
+  generateQuoteNumberAction,
+} from '@/app/actions/quote'
 import { CreateCustomerDialog } from '@/components/quote/create-customer-dialog'
+import { AppendixTableEditor } from '@/components/quote/appendix-table-editor'
+import type { AppendixTable } from '@/types/appendix'
+import { translateAppendixTable } from '@/lib/appendix/i18n'
 import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS } from '@/lib/i18n/types'
+import type { SupportedLanguage } from '@/lib/i18n/types'
+import { COMPANY_IDS, COMPANIES } from '@/lib/company'
 import type { Customer } from '@/types/quote'
+import { toast } from 'sonner'
 
 /** 금액 포맷 (1000단위 콤마) */
 function formatCurrency(value: number): string {
@@ -52,10 +62,14 @@ export function QuoteForm({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers)
+  const [isGeneratingNumber, setIsGeneratingNumber] = useState(false)
+  const isEdit = mode === 'edit'
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteFormSchema),
     defaultValues: defaultValues ?? {
+      company: 'kprotek',
+      quoteNumber: '',
       customerId: '',
       issueDate: new Date().toISOString().split('T')[0],
       validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
@@ -84,6 +98,55 @@ export function QuoteForm({
     name: 'items',
   })
 
+  // 회사 선택 변경 시 견적서 번호 자동 생성
+  const watchedCompany = form.watch('company')
+  const prevCompanyRef = useRef(watchedCompany)
+
+  useEffect(() => {
+    // 수정 모드에서는 자동 생성 안 함
+    if (isEdit) return
+    // 이전 값과 동일하면 스킵 (초기 렌더링 제외)
+    if (
+      prevCompanyRef.current === watchedCompany &&
+      form.getValues('quoteNumber')
+    )
+      return
+    prevCompanyRef.current = watchedCompany
+
+    if (!watchedCompany) return
+
+    setIsGeneratingNumber(true)
+    generateQuoteNumberAction(watchedCompany).then(result => {
+      if (result.success && result.quoteNumber) {
+        form.setValue('quoteNumber', result.quoteNumber)
+      }
+      setIsGeneratingNumber(false)
+    })
+  }, [watchedCompany, isEdit, form])
+
+  // 언어 변경 시 부속 내역서 라벨 자동 번역
+  const watchedLanguage = form.watch('language') as SupportedLanguage
+  const prevLanguageRef = useRef(watchedLanguage)
+
+  useEffect(() => {
+    if (prevLanguageRef.current === watchedLanguage) return
+    const prevLang = prevLanguageRef.current
+    prevLanguageRef.current = watchedLanguage
+
+    // 부속 내역서가 없으면 스킵
+    const tables = form.getValues('appendixTables') as
+      | AppendixTable[]
+      | undefined
+    if (!tables || tables.length === 0) return
+
+    // 이전 언어→새 언어로 라벨 번역
+    void prevLang // 역방향 맵으로 자동 감지하므로 fromLang 불필요
+    const translated = tables.map(t =>
+      translateAppendixTable(t, watchedLanguage)
+    )
+    form.setValue('appendixTables', translated, { shouldDirty: true })
+  }, [watchedLanguage, form])
+
   // 실시간 금액 계산
   const watchedItems = form.watch('items')
   const totalAmount = watchedItems.reduce(
@@ -104,18 +167,85 @@ export function QuoteForm({
           result.quoteId ? `/admin/quote/${result.quoteId}` : '/admin/dashboard'
         )
       } else {
-        alert(result.error || '저장에 실패했습니다')
+        toast.error(result.error || '저장에 실패했습니다')
       }
     })
   }
 
+  // 유효성 검증 실패 시 에러 표시
+  function onInvalid(errors: Record<string, unknown>) {
+    console.error('[QuoteForm] 유효성 검증 실패:', errors)
+    toast.error('입력값을 확인해주세요. 필수 항목이 누락되었습니다.')
+  }
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+        className="space-y-8"
+      >
         {/* 기본 정보 */}
         <div className="rounded-lg border p-6">
           <h2 className="mb-4 text-lg font-semibold">기본 정보</h2>
           <div className="grid gap-4 sm:grid-cols-2">
+            {/* 회사 선택 */}
+            <FormField
+              control={form.control}
+              name="company"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    회사 <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={isEdit}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="회사를 선택하세요" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {COMPANY_IDS.map(id => (
+                        <SelectItem key={id} value={id}>
+                          {COMPANIES[id].displayName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 견적서 번호 */}
+            <FormField
+              control={form.control}
+              name="quoteNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    견적서 번호 <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        placeholder="자동 생성됩니다"
+                        {...field}
+                        disabled={isEdit}
+                      />
+                      {isGeneratingNumber && (
+                        <Loader2 className="text-muted-foreground absolute top-2.5 right-3 h-4 w-4 animate-spin" />
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {/* 고객 선택 */}
             <FormField
               control={form.control}
@@ -471,6 +601,15 @@ export function QuoteForm({
           </div>
         </div>
 
+        {/* 부속 내역서 */}
+        <AppendixTableEditor
+          values={(form.watch('appendixTables') as AppendixTable[]) ?? []}
+          onChange={val =>
+            form.setValue('appendixTables', val, { shouldDirty: true })
+          }
+          language={watchedLanguage}
+        />
+
         {/* 제출 버튼 */}
         <div className="flex justify-end gap-3">
           <Button
@@ -481,7 +620,7 @@ export function QuoteForm({
           >
             취소
           </Button>
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" disabled={isPending || isGeneratingNumber}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {mode === 'create' ? '견적서 생성' : '견적서 수정'}
           </Button>

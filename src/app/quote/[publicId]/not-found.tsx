@@ -1,5 +1,5 @@
 import { FileX, Mail } from 'lucide-react'
-import { COMPANY_INFO } from '@/lib/constants'
+import { getCompanyConfig, DEFAULT_COMPANY } from '@/lib/company'
 
 /**
  * 견적서 전용 404 페이지
@@ -8,6 +8,7 @@ import { COMPANY_INFO } from '@/lib/constants'
  * 내부 시스템 링크를 노출하지 않고, 문의 이메일만 제공
  */
 export default function QuoteNotFound() {
+  const company = getCompanyConfig(DEFAULT_COMPANY)
   const subject = encodeURIComponent('견적서 문의')
 
   return (
@@ -25,7 +26,7 @@ export default function QuoteNotFound() {
             필요하시면 아래로 문의해 주세요.
           </p>
           <a
-            href={`mailto:${COMPANY_INFO.email}?subject=${subject}`}
+            href={`mailto:${company.email}?subject=${subject}`}
             className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-medium transition-colors"
           >
             <Mail className="h-4 w-4" />

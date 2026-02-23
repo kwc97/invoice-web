@@ -4,6 +4,6 @@
 
 export { SUPPORTED_LANGUAGES, LANGUAGE_LABELS } from './types'
 export type { SupportedLanguage, Dictionary } from './types'
-export { getDictionary } from './dictionaries'
+export { getDictionary, getDictionaryForCompany } from './dictionaries'
 export { translateTexts, translateQuoteContent } from './translate'
 export { formatDateByLanguage, formatCurrencyByLanguage } from './format'

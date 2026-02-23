@@ -1,13 +1,13 @@
 /**
  * PDF 생성 API Route
- * 견적서 ID를 받아 서버사이드에서 PDF를 생성하여 반환 (다국어 지원)
+ * 견적서 ID를 받아 서버사이드에서 PDF를 생성하여 반환 (다국어 + 다중 법인 지원)
  */
 
 import { NextResponse } from 'next/server'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { getQuoteById } from '@/lib/notion/quotes'
 import { QuoteDocument } from '@/lib/pdf/document'
-import { getDictionary, translateQuoteContent } from '@/lib/i18n'
+import { getDictionaryForCompany, translateQuoteContent } from '@/lib/i18n'
 import { formatDateByLanguage } from '@/lib/i18n/format'
 
 interface RouteContext {
@@ -41,7 +41,7 @@ export async function GET(_request: Request, context: RouteContext) {
     }
 
     const lang = quote.language ?? 'ko'
-    const dict = getDictionary(lang)
+    const dict = getDictionaryForCompany(lang, quote.company)
 
     // 동적 콘텐츠 번역 (한국어 외)
     const translatedQuote =
@@ -59,6 +59,7 @@ export async function GET(_request: Request, context: RouteContext) {
       QuoteDocument({
         quote: formattedQuote,
         dictionary: dict,
+        companyId: quote.company,
       }) as React.JSX.Element
     )
 

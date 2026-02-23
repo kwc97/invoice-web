@@ -5,6 +5,8 @@
 
 import type { QuoteStatus } from '@/lib/constants'
 import type { SupportedLanguage } from '@/lib/i18n/types'
+import type { CompanyId } from '@/lib/company'
+import type { AppendixTable } from './appendix'
 
 /**
  * 고객 (Customer) 타입
@@ -78,12 +80,16 @@ export interface Quote {
   contactPerson?: string
   /** 견적서 언어 (기본값: 'ko') */
   language: SupportedLanguage
+  /** 회사 ID (기본값: 'kprotek') */
+  company: CompanyId
 
   // 조인된 데이터 (선택적)
   /** 고객 정보 (조인 시에만 포함) */
   customer?: Customer
   /** 견적 항목 목록 (조인 시에만 포함) */
   items?: QuoteItem[]
+  /** 부속 내역서 (선택, 최대 3개) */
+  appendixTables?: AppendixTable[]
 
   // 메타데이터
   /** 생성일시 */

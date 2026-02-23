@@ -68,17 +68,5 @@ export const CURRENCY = {
 } as const
 
 /**
- * 공급자(회사) 정보 상수
- * 견적서 양식의 공급자란에 표시
+ * @deprecated COMPANY_INFO는 제거됨. `getCompanyConfig()` (from '@/lib/company')를 사용하세요.
  */
-export const COMPANY_INFO = {
-  name: '(주)케이프로텍',
-  representative: '신창군',
-  businessNumber: '129-86-56148',
-  address: '경기도 평택시 오성서로 5-67',
-  businessType: '건설업,제조업,도소매',
-  businessCategory: '기계설치,기계장치,기계설비',
-  tel: '031-704-2989',
-  fax: '031-704-2985',
-  email: 'info@kprotek.com',
-} as const

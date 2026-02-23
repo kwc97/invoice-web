@@ -135,4 +135,15 @@
   [data-sonner-toaster] {
     display: none !important;
   }
+
+  /* 부속 내역서: 가로 방향 페이지 */
+  .print-landscape {
+    page: landscape-appendix;
+  }
+}
+
+/* 부속 내역서 가로 인쇄용 Named Page */
+@page landscape-appendix {
+  size: A4 landscape;
+  margin: 15mm;
 }

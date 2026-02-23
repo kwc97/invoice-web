@@ -10,6 +10,7 @@ import type {
 import type { Quote, QuoteItem, Customer } from '@/types/quote'
 import type { QuoteStatus } from '@/lib/constants'
 import type { SupportedLanguage } from '@/lib/i18n/types'
+import { getCompanyIdByNotionValue, type CompanyId } from '@/lib/company'
 
 /**
  * Notion Rich Text 추출
@@ -149,6 +150,13 @@ export function mapNotionQuoteToQuote(
   const languageProp = page.properties.Language as any
   const language = (languageProp?.select?.name ?? 'ko') as SupportedLanguage
 
+  // Company Select에서 값 추출 (null이면 'kprotek' 기본값)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const companyProp = page.properties.Company as any
+  const company: CompanyId = getCompanyIdByNotionValue(
+    companyProp?.select?.name ?? null
+  )
+
   // Total Amount는 'Total Amount ' (공백 포함!) + Rollup 타입
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const totalAmountProp = page.properties['Total Amount '] as any
@@ -170,6 +178,7 @@ export function mapNotionQuoteToQuote(
     ...(recipient && { recipient }),
     ...(contactPerson && { contactPerson }),
     language,
+    company,
     createdTime: page.created_time,
     lastEditedTime: page.last_edited_time,
   }

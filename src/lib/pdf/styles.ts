@@ -57,15 +57,15 @@ export function createStyles(fontFamily: string) {
       position: 'relative',
     },
 
-    /** 도장 이미지 */
+    /** 도장 이미지 — 위로 올려서 성명 영역 가독성 확보 */
     stampImage: {
       position: 'absolute',
-      top: -5,
-      right: 5,
-      width: 65,
-      height: 65,
+      top: -18,
+      right: 2,
+      width: 60,
+      height: 60,
       zIndex: 10,
-      opacity: 0.9,
+      opacity: 0.8,
     },
 
     /** 로고 텍스트 */
@@ -138,7 +138,7 @@ export function createStyles(fontFamily: string) {
       flexDirection: 'row',
     },
     supplierHeader: {
-      width: 65,
+      width: 55,
       justifyContent: 'center',
       paddingHorizontal: 4,
       paddingVertical: 3,
@@ -154,6 +154,20 @@ export function createStyles(fontFamily: string) {
       paddingHorizontal: 4,
       paddingVertical: 3,
       fontSize: 8,
+    },
+    /** 분할 행의 두 번째 헤더 (성명, 종목, FAX) */
+    supplierHeader2: {
+      width: 40,
+      justifyContent: 'center',
+      paddingHorizontal: 4,
+      paddingVertical: 3,
+      borderRightWidth: 1,
+      borderRightColor: COLORS.border,
+      borderLeftWidth: 1,
+      borderLeftColor: COLORS.border,
+      fontSize: 8,
+      fontWeight: 'bold',
+      textAlign: 'center',
     },
 
     /** 견적담당자 바 */
@@ -269,6 +283,26 @@ export function createStyles(fontFamily: string) {
       borderTopWidth: 1,
       borderTopColor: '#cccccc',
       paddingTop: 8,
+    },
+
+    /** 부가내역서 푸터 좌측 (날짜) */
+    appendixFooterLeft: {
+      position: 'absolute',
+      bottom: 15,
+      left: 30,
+      fontSize: 8,
+      fontFamily,
+      color: COLORS.textMuted,
+    },
+
+    /** 부가내역서 푸터 우측 (페이지번호) */
+    appendixFooterRight: {
+      position: 'absolute',
+      bottom: 15,
+      right: 30,
+      fontSize: 8,
+      fontFamily,
+      color: COLORS.textMuted,
     },
   })
 

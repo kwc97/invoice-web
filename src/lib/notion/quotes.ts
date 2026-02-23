@@ -19,6 +19,7 @@ import type {
 } from '@/types/notion'
 import type { Quote, QuoteItem, Customer } from '@/types/quote'
 import { QUOTE_STATUS, type QuoteStatus } from '@/lib/constants'
+import { getAppendixData } from './blocks'
 
 /**
  * Customer ID로 고객 정보 조회
@@ -150,16 +151,21 @@ export async function getQuoteById(id: string): Promise<Quote | null> {
       return null
     }
 
-    const [customer, items] = await Promise.all([
+    const [customer, items, appendixTables] = await Promise.all([
       getCustomerById(customerRelation.id),
       getQuoteItemsByQuoteId(quotePage.id),
+      getAppendixData(quotePage.id),
     ])
 
     if (!customer) {
       return null
     }
 
-    return mapNotionQuoteToQuote(quotePage, customer, items)
+    const quote = mapNotionQuoteToQuote(quotePage, customer, items)
+    if (appendixTables.length > 0) {
+      quote.appendixTables = appendixTables
+    }
+    return quote
   } catch (error) {
     console.error('Failed to fetch quote by ID:', error)
     return null
@@ -193,16 +199,21 @@ export async function getQuoteByPublicLink(
       return null
     }
 
-    const [customer, items] = await Promise.all([
+    const [customer, items, appendixTables] = await Promise.all([
       getCustomerById(customerRelation.id),
       getQuoteItemsByQuoteId(quotePage.id),
+      getAppendixData(quotePage.id),
     ])
 
     if (!customer) {
       return null
     }
 
-    return mapNotionQuoteToQuote(quotePage, customer, items)
+    const quote = mapNotionQuoteToQuote(quotePage, customer, items)
+    if (appendixTables.length > 0) {
+      quote.appendixTables = appendixTables
+    }
+    return quote
   } catch (error) {
     console.error('Failed to fetch quote by public link:', error)
     return null
@@ -350,16 +361,26 @@ export async function getCustomers(): Promise<Customer[]> {
 
 /**
  * 다음 견적서 번호 자동 생성
- * 형식: QFK-YY-NNN (예: QFK-26-023)
+ * 형식: {prefix}-YY-NNN (예: QFK-26-023, QFJ-26-001)
+ * @param prefix 견적서 번호 접두사 (기본값: 'QFK')
  */
-export async function generateQuoteNumber(): Promise<string> {
+export async function generateQuoteNumber(
+  prefix: string = 'QFK'
+): Promise<string> {
   const now = new Date()
   const yearPrefix = String(now.getFullYear()).slice(2) // "26"
+  const pattern = new RegExp(`${prefix}-(\\d{2})-(\\d{3})`)
 
   try {
-    // 최근 견적서를 번호 내림차순으로 1건 조회
+    // 해당 접두사의 견적서만 필터링하여 번호 내림차순으로 조회
     const response = await (notion.databases as any).query({
       database_id: NOTION_DB_IDS.QUOTES,
+      filter: {
+        property: 'Name',
+        title: {
+          starts_with: `${prefix}-`,
+        },
+      },
       sorts: [{ property: 'Name', direction: 'descending' }],
       page_size: 1,
     })
@@ -367,22 +388,21 @@ export async function generateQuoteNumber(): Promise<string> {
     if (response.results.length > 0) {
       const page = response.results[0] as NotionQuotePage
       const lastName = page.properties.Name?.title?.[0]?.plain_text ?? ''
-      // QFK-26-022 → year=26, seq=22
-      const match = lastName.match(/QFK-(\d{2})-(\d{3})/)
+      const match = lastName.match(pattern)
       if (match) {
         const [, lastYear, lastSeq] = match
         if (lastYear === yearPrefix) {
           const nextSeq = String(Number(lastSeq) + 1).padStart(3, '0')
-          return `QFK-${yearPrefix}-${nextSeq}`
+          return `${prefix}-${yearPrefix}-${nextSeq}`
         }
       }
     }
 
     // 해당 연도 첫 번째 견적서
-    return `QFK-${yearPrefix}-001`
+    return `${prefix}-${yearPrefix}-001`
   } catch (error) {
     console.error('Failed to generate quote number:', error)
-    return `QFK-${yearPrefix}-001`
+    return `${prefix}-${yearPrefix}-001`
   }
 }
 
@@ -409,6 +429,7 @@ export async function createQuote(data: {
   contactPerson?: string
   notes?: string
   language?: string
+  company?: string
 }): Promise<string> {
   const response = await notion.pages.create({
     parent: { database_id: NOTION_DB_IDS.QUOTES },
@@ -429,6 +450,7 @@ export async function createQuote(data: {
       ...(data.language
         ? { Language: { select: { name: data.language } } }
         : {}),
+      ...(data.company ? { Company: { select: { name: data.company } } } : {}),
     } as any,
   })
   return response.id

@@ -182,6 +182,8 @@ export interface NotionQuotePage {
     'Contact Person'?: NotionRichText
     /** 견적서 언어 (Select, 선택) */
     Language?: NotionSelect
+    /** 회사 (Select, 선택) */
+    Company?: NotionSelect
   }
 }
 

@@ -8,6 +8,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { StatusBadge } from '@/components/ui/status-badge'
+import { AppendixTableView } from '@/components/quote/appendix-table-view'
 import type { Quote } from '@/types/quote'
 import { CURRENCY } from '@/lib/constants'
 
@@ -160,6 +161,20 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* 부속 내역서 */}
+      {quote.appendixTables && quote.appendixTables.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>부속 내역서</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {quote.appendixTables.map((table, i) => (
+              <AppendixTableView key={i} table={table} />
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* 비고 */}
       {quote.notes && (

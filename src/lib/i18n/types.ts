@@ -35,11 +35,15 @@ export interface Dictionary {
     label: string
     businessNumber: string
     companyName: string
-    address: string
-    businessType: string
-    telFax: string
-    /** "대표:" 라벨 */
+    /** "성명" / "Name" 라벨 */
     representativeLabel: string
+    address: string
+    /** "업태" 라벨 */
+    businessTypeLabel: string
+    /** "종목" 라벨 */
+    businessCategoryLabel: string
+    telLabel: string
+    faxLabel: string
     /** 공급자 정보 값 (언어별 번역) */
     values: {
       companyName: string

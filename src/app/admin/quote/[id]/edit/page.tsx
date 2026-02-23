@@ -51,6 +51,8 @@ export default async function EditQuotePage({ params }: PageProps) {
 
   // 기존 데이터를 폼 기본값으로 변환
   const defaultValues: QuoteFormData = {
+    company: quote.company ?? 'kprotek',
+    quoteNumber: quote.quoteNumber,
     customerId: quote.customerId,
     issueDate: koreanDateToISO(quote.issueDate),
     validUntil: koreanDateToISO(quote.validUntil),
@@ -68,6 +70,7 @@ export default async function EditQuotePage({ params }: PageProps) {
       unit: item.unit ?? '',
       remarks: item.remarks ?? '',
     })),
+    appendixTables: quote.appendixTables,
   }
 
   return (

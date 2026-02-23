@@ -24,6 +24,9 @@ import {
 } from '@/lib/notion/quotes'
 import { QUOTE_STATUS } from '@/lib/constants'
 import { quoteFormSchema, createCustomerSchema } from '@/lib/validations/quote'
+import { getCompanyConfig, type CompanyId } from '@/lib/company'
+import { saveAppendixData } from '@/lib/notion/blocks'
+import type { AppendixTable } from '@/types/appendix'
 
 /**
  * 공개 견적서 열람 확인 (외부 고객 접근 시 자동 호출)
@@ -209,6 +212,29 @@ export async function recallQuoteAction(quoteId: string) {
   }
 }
 
+/**
+ * 견적서 번호 자동 생성 (클라이언트에서 회사 변경 시 호출)
+ */
+export async function generateQuoteNumberAction(companyId: string) {
+  const session = await auth()
+  if (!session?.user) {
+    return { success: false, error: '인증이 필요합니다', quoteNumber: '' }
+  }
+
+  try {
+    const config = getCompanyConfig(companyId as CompanyId)
+    const quoteNumber = await generateQuoteNumber(config.quotePrefix)
+    return { success: true, quoteNumber }
+  } catch (error) {
+    console.error('Failed to generate quote number:', error)
+    return {
+      success: false,
+      error: '견적서 번호 생성에 실패했습니다',
+      quoteNumber: '',
+    }
+  }
+}
+
 /** 수정 가능한 상태 */
 const EDITABLE_STATUSES = [QUOTE_STATUS.DRAFT, QUOTE_STATUS.REJECTED] as const
 
@@ -248,12 +274,9 @@ export async function createQuoteAction(formData: unknown) {
   const data = parsed.data
 
   try {
-    // 견적서 번호 자동 생성
-    const quoteNumber = await generateQuoteNumber()
-
-    // 견적서 생성
+    // 견적서 생성 (번호는 폼에서 전달받음)
     const quoteId = await createQuote({
-      quoteNumber,
+      quoteNumber: data.quoteNumber,
       customerId: data.customerId,
       issueDate: data.issueDate,
       validUntil: data.validUntil,
@@ -262,6 +285,7 @@ export async function createQuoteAction(formData: unknown) {
       contactPerson: data.contactPerson || undefined,
       notes: data.notes || undefined,
       language: data.language || undefined,
+      company: data.company || undefined,
     })
 
     // 견적 항목들 병렬 생성
@@ -277,6 +301,12 @@ export async function createQuoteAction(formData: unknown) {
           quoteId,
         })
       )
+    )
+
+    // 부속 내역서 저장
+    await saveAppendixData(
+      quoteId,
+      (data.appendixTables as AppendixTable[]) ?? []
     )
 
     invalidateQuoteCaches(quoteId)
@@ -375,6 +405,12 @@ export async function updateQuoteAction(quoteId: string, formData: unknown) {
           })
         }
       })
+    )
+
+    // 부속 내역서 저장
+    await saveAppendixData(
+      quoteId,
+      (data.appendixTables as AppendixTable[]) ?? []
     )
 
     invalidateQuoteCaches(quoteId)

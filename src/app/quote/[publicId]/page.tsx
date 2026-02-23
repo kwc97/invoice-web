@@ -6,9 +6,10 @@ import { QuoteActions } from '@/components/quote/quote-actions'
 import { ConfirmViewTracker } from '@/components/quote/confirm-view-tracker'
 import { AlertTriangle, FileX, Mail } from 'lucide-react'
 import { getCachedQuoteByPublicLink } from '@/lib/notion'
-import { getDictionary, translateQuoteContent } from '@/lib/i18n'
+import { getDictionaryForCompany, translateQuoteContent } from '@/lib/i18n'
 import { formatDateByLanguage } from '@/lib/i18n/format'
-import { COMPANY_INFO, QUOTE_STATUS } from '@/lib/constants'
+import { QUOTE_STATUS } from '@/lib/constants'
+import { getCompanyConfig } from '@/lib/company'
 
 interface PageProps {
   params: Promise<{ publicId: string }>
@@ -24,13 +25,15 @@ export async function generateMetadata({
   }
 
   const lang = quote.language ?? 'ko'
-  const dict = getDictionary(lang)
+  const company = getCompanyConfig(quote.company)
+  const dict = getDictionaryForCompany(lang, quote.company)
   return {
     title: `${dict.quote.title} - ${quote.quoteNumber}`,
     description:
       lang === 'ko'
         ? `${quote.customer?.name}님께 보내는 견적서입니다.`
         : `Quotation ${quote.quoteNumber} for ${quote.customer?.name}`,
+    ...(company.icon && { icons: { icon: company.icon } }),
   }
 }
 
@@ -55,7 +58,8 @@ export default async function PublicQuotePage({ params }: PageProps) {
   const shouldTrackView = !isAdmin && quote.status === QUOTE_STATUS.SENT
 
   const lang = quote.language ?? 'ko'
-  const dict = getDictionary(lang)
+  const company = getCompanyConfig(quote.company)
+  const dict = getDictionaryForCompany(lang, quote.company)
 
   // 동적 콘텐츠 번역 (한국어가 아닐 때만)
   const translatedQuote =
@@ -96,7 +100,7 @@ export default async function PublicQuotePage({ params }: PageProps) {
               {dict.messages.unavailableDescription}
             </p>
             <a
-              href={`mailto:${COMPANY_INFO.email ?? ''}?subject=${encodeURIComponent(dict.messages.expiredContact + ' - ' + quote.quoteNumber)}`}
+              href={`mailto:${company.email ?? ''}?subject=${encodeURIComponent(dict.messages.expiredContact + ' - ' + quote.quoteNumber)}`}
               className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-medium transition-colors"
             >
               <Mail className="h-4 w-4" />
@@ -128,7 +132,7 @@ export default async function PublicQuotePage({ params }: PageProps) {
               {dict.messages.expiredDescription}
             </p>
             <a
-              href={`mailto:${COMPANY_INFO.email ?? ''}?subject=${encodeURIComponent(dict.messages.expiredContact + ' - ' + quote.quoteNumber)}`}
+              href={`mailto:${company.email ?? ''}?subject=${encodeURIComponent(dict.messages.expiredContact + ' - ' + quote.quoteNumber)}`}
               className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-medium transition-colors"
             >
               <Mail className="h-4 w-4" />
@@ -144,7 +148,11 @@ export default async function PublicQuotePage({ params }: PageProps) {
     <div className="bg-muted/30 min-h-screen px-4 py-12 print:bg-white print:p-0">
       {shouldTrackView && <ConfirmViewTracker quoteId={quote.id} />}
       <div className="space-y-6 print:space-y-0">
-        <PublicQuoteView quote={formattedQuote} dictionary={dict} />
+        <PublicQuoteView
+          quote={formattedQuote}
+          dictionary={dict}
+          companyId={quote.company}
+        />
         <div className="print:hidden">
           <QuoteActions
             quoteId={quote.id}

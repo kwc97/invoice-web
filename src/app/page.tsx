@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { COMPANY_INFO } from '@/lib/constants'
+import { getCompanyConfig } from '@/lib/company'
 import {
   ArrowRight,
   CheckCircle2,
@@ -127,6 +127,8 @@ const FEATURES = [
 ] as const
 
 export default function Home() {
+  const companyInfo = getCompanyConfig('kprotek')
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* ===== 히어로 섹션 ===== */}
@@ -383,7 +385,7 @@ export default function Home() {
               </div>
               <div>
                 <p className="text-foreground text-sm font-medium">
-                  {COMPANY_INFO.name}
+                  {companyInfo.displayName}
                 </p>
                 <p className="text-muted-foreground text-xs">
                   KPROTEK Co., Ltd.
@@ -394,15 +396,15 @@ export default function Home() {
             {/* 회사 연락처 정보 */}
             <div className="text-muted-foreground space-y-1 text-xs">
               <p>
-                사업자등록번호: {COMPANY_INFO.businessNumber}
+                사업자등록번호: {companyInfo.businessNumber}
                 {' · '}
-                대표: {COMPANY_INFO.representative}
+                대표: {companyInfo.supplierValues.ko.representative}
               </p>
-              <p>{COMPANY_INFO.address}</p>
+              <p>{companyInfo.supplierValues.ko.address}</p>
               <p>
-                TEL: {COMPANY_INFO.tel}
+                TEL: {companyInfo.supplierValues.ko.tel}
                 {' · '}
-                FAX: {COMPANY_INFO.fax}
+                FAX: {companyInfo.supplierValues.ko.fax}
               </p>
             </div>
           </div>
@@ -410,8 +412,8 @@ export default function Home() {
           {/* 저작권 */}
           <div className="mt-6 border-t pt-6 text-center">
             <p className="text-muted-foreground text-xs">
-              © {new Date().getFullYear()} {COMPANY_INFO.name}. All rights
-              reserved.
+              © {new Date().getFullYear()} {companyInfo.displayName}. All
+              rights reserved.
             </p>
           </div>
         </Container>

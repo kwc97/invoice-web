@@ -30,7 +30,7 @@ export default async function NewQuotePage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">새 견적서 작성</h1>
         <p className="text-muted-foreground mt-1">
-          견적서 번호는 자동으로 생성됩니다.
+          회사를 선택하면 견적서 번호가 자동으로 생성됩니다.
         </p>
       </div>
 

@@ -6,6 +6,7 @@
 import { z } from 'zod'
 import { QUOTE_STATUS } from '@/lib/constants'
 import { SUPPORTED_LANGUAGES } from '@/lib/i18n/types'
+import { COMPANY_IDS } from '@/lib/company'
 
 /**
  * 견적서 상태 업데이트 검증 스키마
@@ -82,6 +83,35 @@ export const quoteFilterSchema = z.object({
 export type QuoteFilterData = z.infer<typeof quoteFilterSchema>
 
 /**
+ * 부속 내역서 컬럼 스키마
+ */
+export const appendixColumnSchema = z.object({
+  key: z.string().min(1),
+  /** 빈 라벨 허용 — 그룹 헤더가 있으면 그룹명이 실질적 라벨 역할 */
+  label: z.string(),
+  group: z.string().optional(),
+  align: z.enum(['left', 'center', 'right']).optional(),
+  format: z.enum(['text', 'number', 'currency']).optional(),
+})
+
+/**
+ * 부속 내역서 행 스키마
+ */
+export const appendixRowSchema = z.object({
+  values: z.record(z.string(), z.union([z.string(), z.number()])),
+  isTotal: z.boolean().optional(),
+})
+
+/**
+ * 부속 내역서 테이블 스키마
+ */
+export const appendixTableSchema = z.object({
+  title: z.string().min(1, '제목을 입력하세요'),
+  columns: z.array(appendixColumnSchema).min(1, '최소 1개 컬럼이 필요합니다'),
+  rows: z.array(appendixRowSchema).min(1, '최소 1개 행이 필요합니다'),
+})
+
+/**
  * 견적 항목 스키마
  */
 export const quoteItemSchema = z.object({
@@ -105,6 +135,12 @@ export const quoteItemSchema = z.object({
  * 견적서 폼 스키마 (생성/수정 공통)
  */
 export const quoteFormSchema = z.object({
+  /** 회사 ID */
+  company: z.enum(COMPANY_IDS as [string, ...string[]], {
+    message: '회사를 선택하세요',
+  }),
+  /** 견적서 번호 */
+  quoteNumber: z.string().min(1, '견적서 번호가 필요합니다'),
   /** 고객 ID */
   customerId: z.string().min(1, '고객을 선택하세요'),
   /** 발행일 (YYYY-MM-DD) */
@@ -123,6 +159,8 @@ export const quoteFormSchema = z.object({
   language: z.enum(SUPPORTED_LANGUAGES),
   /** 견적 항목 목록 */
   items: z.array(quoteItemSchema).min(1, '최소 1개 항목을 추가하세요'),
+  /** 부속 내역서 (선택, 최대 3개) */
+  appendixTables: z.array(appendixTableSchema).max(3).optional(),
 })
 
 /** 견적서 폼 데이터 타입 */
